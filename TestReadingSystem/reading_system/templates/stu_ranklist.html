@@ -1,0 +1,77 @@
+{% extends 'layout_stu.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="btn-group" id="grade_btn">
+          <button type="button" class="btn btn-danger">年级: </button>
+          <button type="button" class="btn btn-info">{{ grade }}</button>
+{#          <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#}
+{#            <span class="caret"></span>#}
+{#            <span class="sr-only">Toggle Dropdown</span>#}
+{#          </button>#}
+{#          <ul class="dropdown-menu">#}
+{#              <li><a href="#">一年级</a></li>#}
+{#              <li><a href="#">二年级</a></li>#}
+{#              <li><a href="#">三年级</a></li>#}
+{#              <li><a href="#">四年级</a></li>#}
+{#              <li><a href="#">五年级</a></li>#}
+{#              <li><a href="#">六年级</a></li>#}
+{#          </ul>#}
+        </div>
+        <div class="btn-group" id="test_btn" >
+            <button type="button" class="btn btn-primary">选择题目类型: </button>
+          <button type="button" class="btn btn-success">{{ test }}</button>
+          <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="/stu/ranklist/1/">阅读准确性测试</a></li>
+            <li><a href="/stu/ranklist/2/">阅读流畅性测试一</a></li>
+            <li><a href="/stu/ranklist/3/">阅读流畅性测试二</a></li>
+          </ul>
+        </div>
+        <table class="table table-bordered" style="text-align: center">
+            <tr>
+                <th style="width: 10%;">排名</th>
+                <th style="width: 25%;">姓名</th>
+                <th style="width: 25%;">分数</th>
+                <th style="width: 40%;">测试时间</th>
+            </tr>
+            {% for obj in ranklist %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ obj.stu_name }}</td>
+                <td>{{ obj.score }}</td>
+                <td>{{ obj.time|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+
+{% endblock %}
+
+{% block css %}
+<style>
+    td{
+        text-align: center;
+    }
+    th{
+        text-align: center;
+    }
+    #grade_btn{
+        margin-top: 5px;
+        margin-bottom: 10px;
+        float: right;
+    }
+    #test_btn{
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    li{
+        text-align: center;
+    }
+</style>
+{% endblock %}

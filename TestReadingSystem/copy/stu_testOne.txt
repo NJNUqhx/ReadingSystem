@@ -1,0 +1,71 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="jumbotron" >
+        <h1>汉字</h1>
+        <p>
+            <button type="button" class="btn btn-primary btn-lg " onclick="startTime()"> 开始 </button>
+            <button type="button" class="btn btn-success btn-lg" id="cur_time">00:00</button>
+            <button type="button" class="btn btn-danger btn-lg" id="start_time">00:00</button>
+            <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    h1{
+        font-size: 300px;
+        text-align: center;
+        height: 450px;
+        line-height: 450px;
+    }
+
+</style>
+{% endblock %}
+
+{% block js %}
+<script>
+    var isStart=true;
+    var start=new Date();
+    function startTime(){
+        var now=new Date();
+        if(isStart)
+        {
+            isStart=false;
+            start=now;
+        }
+        var m=now.getMinutes();
+        var s=now.getSeconds();// 在小于10的数字前加一个‘0’
+        m = checkTime(m);
+        s = checkTime(s);
+        {#document.getElementById('cur_time').innerHTML = m + "分" + s + "秒";#}
+        document.getElementById('cur_time').innerText = m + ":" + s;
+        t = setTimeout(function(){startTime()},500);
+
+        var m2=start.getMinutes();
+        var s2=start.getSeconds();// 在小于10的数字前加一个‘0’
+        m2 = checkTime(m2);
+        s2 = checkTime(s2);
+        document.getElementById('start_time').innerText = m2 + ":" + s2;
+
+        var differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
+        var differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        differ_m = checkTime(differ_m)
+        differ_s = checkTime(differ_s)
+        document.getElementById('differ_time').innerText = differ_m + ":" + differ_s;
+    }
+    function countTime(){
+        var start = new Date();
+    }
+    function checkTime(i){
+        if (i<10){
+            i="0" + i;
+        }
+        return i;
+    }
+</script>
+{% endblock %}

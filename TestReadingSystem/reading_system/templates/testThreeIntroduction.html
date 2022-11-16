@@ -1,0 +1,30 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron" >
+            <h1 style="text-align: center">阅读流畅性测试二</h1>
+            <h3 style="text-align: left;margin-top: 10%;line-height: 2em;">&emsp;&emsp;出声朗读下面的句子，你要读的又快又准。读完后，立刻判断句子的内容是正确的还是错误的，如果正确，请用笔在后面的空格里打钩，如果错误，打叉。只给3分钟时间。</h3>
+            <a type="button" class="btn btn-success btn-lg" href="/stu/testThree/" style="margin-top: 25%;margin-left: 40%;">点击开始测试</a>
+        </div>
+    </div>
+    <audio id="player">
+          <source src="{% static 'music/song.mp3' %}" type="audio/mpeg">
+        </audio>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function () {
+        playMusic();
+    })
+    function playMusic() {
+        var player = $("#player")[0];
+        if(player.paused)
+            player.play();
+        else
+            player.pause();
+        console.log("播放音乐")
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'layout_stu.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron" >
+            <h1 style="text-align: center">阅读准确性测试</h1>
+            <h3 style="text-align: center;margin-top: 10%;line-height: 2em;">&emsp;&emsp;请把下列字正确地读出来，遇见不认识的词语就说“不认识”</h3>
+            <a type="button" class="btn btn-success btn-lg" href="#" style="margin-top: 25%;margin-left: 40%;">点击开始测试</a>
+        </div>
+            <audio id="player">
+          <source src="{% static 'music/song.mp3' %}" type="audio/mpeg">
+        </audio>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function () {
+        playMusic();
+    })
+    function playMusic() {
+        var player = $("#player")[0];
+        if(player.paused)
+            player.play();
+        else
+            player.pause();
+        console.log("播放音乐")
+    }
+</script>
+{% endblock %}

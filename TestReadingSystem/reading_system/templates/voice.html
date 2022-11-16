@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>实现在网页上录音</title>
+</head>
+<body>
+<div class="app">
+<button class="record-btn">record</button>
+<audio controls class="audio-player" >
+</audio>
+<button class="record-btn1">record</button>
+<audio controls class="audio-player1" >
+</audio>
+</div>
+<script>
+if (navigator.mediaDevices.getUserMedia) {
+const constraints = { audio: true };
+navigator.mediaDevices.getUserMedia(constraints).then(
+stream => {
+console.log("授权成功！");
+const recordBtn = document.querySelector(".record-btn");
+const mediaRecorder = new MediaRecorder(stream);
+var chunks = [];
+recordBtn.onclick = () => {
+if (mediaRecorder.state === "recording") {
+mediaRecorder.stop();
+console.log(chunks)
+mediaRecorder.onstop = e => {
+var blob= new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+chunks = [];
+var audioURL = window.URL.createObjectURL(blob);
+const audioSrc = document.querySelector(".audio-player");
+audioSrc.src = audioURL;
+};
+recordBtn.textContent = "record";
+console.log("录音结束");
+} else {
+mediaRecorder.start();
+mediaRecorder.ondataavailable = function(e) {
+chunks.push(e.data);
+};
+console.log(chunks)
+console.log("录音中...");
+recordBtn.textContent = "stop";
+}
+console.log("录音器状态：", mediaRecorder.state);
+};
+
+},
+() => {
+console.error("授权失败！");
+}
+);
+} else {
+console.error("浏览器不支持 getUserMedia");
+}
+if (navigator.mediaDevices.getUserMedia) {
+const constraints1 = { audio: true };
+navigator.mediaDevices.getUserMedia(constraints1).then(
+stream1 => {
+console.log("授权成功！");
+const recordBtn1 = document.querySelector(".record-btn1");
+const mediaRecorder1 = new MediaRecorder(stream1);
+var chunks1 = [];
+recordBtn1.onclick = () => {
+if (mediaRecorder1.state === "recording") {
+mediaRecorder1.stop();
+//console.log(chunks)
+mediaRecorder1.onstop = e => {
+var blob1 = new Blob(chunks1, { type: "audio/ogg; codecs=opus" });
+chunks1 = [];
+var audioURL1 = window.URL.createObjectURL(blob1);
+const audioSrc1 = document.querySelector(".audio-player1");
+audioSrc1.src = audioURL1;
+};
+recordBtn1.textContent = "record";
+console.log("录音结束");
+} else {
+mediaRecorder1.start();
+mediaRecorder1.ondataavailable = function(e) {
+chunks1.push(e.data);
+};
+//console.log(chunks)
+console.log("录音中...");
+recordBtn1.textContent = "stop";
+}
+console.log("录音器状态：", mediaRecorder1.state);
+};
+
+},
+() => {
+console.error("授权失败！");
+}
+);
+} else {
+console.error("浏览器不支持 getUserMedia");
+}
+</script>
+</body>
+</html>

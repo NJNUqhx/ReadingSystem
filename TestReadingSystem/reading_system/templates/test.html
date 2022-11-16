@@ -1,0 +1,34 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+
+<div class="container">
+    <button onclick="startTime()" class="btn btn-success">开始</button>
+    <button id="cur_time" class="btn btn-danger"></button>
+    <br/>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+    function startTime(){
+        var now=new Date();
+        var m=now.getMinutes();
+        var s=now.getSeconds();// 在小于10的数字前加一个‘0’
+        m = checkTime(m);
+        s = checkTime(s);
+        document.getElementById('cur_time').innerHTML = m + "分" + s + "秒";
+        t = setTimeout(function(){startTime()},500);
+    }
+    function countTime(){
+        var start = new Date();
+    }
+    function checkTime(i){
+        if (i<10){
+            i="0" + i;
+        }
+        return i;
+    }
+</script>
+{% endblock %}

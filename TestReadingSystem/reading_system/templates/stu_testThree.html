@@ -1,0 +1,158 @@
+{% extends 'layout_stu.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <div class="jumbotron" >
+        <div>
+            <h3 id="exercise">{{ exercise.content }}</h3>
+            <form method="post">
+                <button type="button" class="btn btn-success btn-lg" id="right" style="float: right"> 对 </button>
+                <button type="button" class="btn btn-danger btn-lg" id="wrong" style="float: right"> 错 </button>
+                <button type="button" class="btn btn-primary btn-lg " id="start"> 开始 </button>
+                <label type="button" class="btn btn-info btn-lg" id="differ_time">00:00</label>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    h1{
+        font-size: 300px;
+        text-align: center;
+        height: 450px;
+        line-height: 450px;
+    }
+    h3 {
+        text-align: center;
+        margin: 25% auto;
+        font-size: 60px;
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+{#<script src="{% static 'js/stu_testOne.js' %}"></script>#}
+<script>
+    $(function(){
+      countTime();
+      uploadInfo();
+      checkTime();
+    })
+    let isStart = true;
+    let start = new Date();
+
+    {#记录当前学生测试情况#}
+    let info = {total_exercise: 0, do_wrong: 0, do_right: 0}
+    {#到达截止时间后跳转#}
+    function checkTime(){
+        const time = getTime();
+        if(time === "03:01") {
+        console.log("turn page");
+        turnPage();
+    }
+        const t = setTimeout(function () {
+            checkTime()
+        }, 1000);
+    }
+    {#记录一次完整的答题情况#}
+    function turnPage(){
+        const text = $('#exercise').val();
+        console.log(typeof text)
+        $.ajax({
+            url: "/stu/turnToResult/",
+            type: "post",
+            data: {score:"98.3", speed: "30/45"},
+            dataType: "JSON",
+            success: function (res){
+                if(res.status)
+                    console.log("向后台传输答题情况成功")
+                    console.log(res);
+                    changeExercise(res.exercise);
+            }
+        })
+        {#跳转到结算几面#}
+        location = "/stu/testOneResult/";
+    }
+
+    function countTime(){
+        const now = new Date();
+        if(isStart)
+        {
+            isStart=false;
+            start=now;
+        }
+        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
+        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        differ_m = checkTimeFormat(differ_m);
+        differ_s = checkTimeFormat(differ_s);
+        document.getElementById('differ_time').innerText = differ_m + ":" + differ_s;
+        t = setTimeout(function(){countTime()},500);
+    }
+    function getTime(){
+        const now = new Date();
+        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
+        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        differ_m = checkTimeFormat(differ_m);
+        differ_s = checkTimeFormat(differ_s);
+        return differ_m + ":" + differ_s;
+    }
+
+    function checkTimeFormat(i){
+        if (i<10){
+            i="0" + i;
+        }
+        return i;
+    }
+
+    function uploadInfo(){
+    $('#right').click(function(){
+        const used_time = getTime();
+        let content = $('#exercise').text();
+        $.ajax({
+            url: "/stu/uploadInfo/",
+            type: "post",
+            data: {time:used_time, choice: 1, info: info, content: content},
+            dataType: "JSON",
+            success: function (res){
+                if(res.status)
+                    console.log("向后台传输答题情况成功");
+                    console.log(this.data);
+                    console.log(res);
+                    changeExercise(res.exercise)
+            }
+        })
+    })
+
+
+
+$('#wrong').click(function(){
+    const used_time = getTime();
+    let content = $('#exercise').text();
+    $.ajax({
+        url: "/stu/uploadInfo/",
+        type: "post",
+        data: {time:used_time, choice: 1, info: info, content: content},
+        dataType: "JSON",
+        success: function (res){
+            if(res.status)
+                console.log("向后台传输答题情况成功");
+                console.log(this.data);
+                console.log(res);
+                changeExercise(res.exercise)
+        }
+    })
+})
+}
+
+{#修改题目#}
+    function changeExercise(new_exercise){
+        console.log("更新题目");
+        $('#exercise').text(new_exercise);
+    }
+
+    </script>
+{% endblock %}

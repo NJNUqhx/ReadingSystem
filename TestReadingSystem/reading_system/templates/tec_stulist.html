@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+        <div class="container">
+            <div style="margin-bottom: 10px " class="clearfix">
+              <a href="/tec/stuadd" class="btn btn-success">
+                  <span class="glyphicon glyphicon-plus-design" aria-hidden="true">
+                  </span>
+                  新建学生账号
+              </a>
+              <div style="float: right; width: 300px;" >
+                  <form method="get">
+                  <div class="input-group">
+                      <input type="text" name="q" class="form-control" placeholder="输入学生姓名" value="{{search_data}}" >
+                      <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </button>
+                      </span>
+                    </div>
+                  </form>
+              </div>
+            </div>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                  <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                  学生信息列表
+              </div>
+                <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>姓名</th>
+                        <th>年级</th>
+                        <th>年龄</th>
+                        <th>账号</th>
+                        <th>密码</th>
+                        <th>管理员</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in queryset %}
+                      <tr>
+                        <th>{{obj.name}}</th>
+                        <th>{{obj.get_grade_display }}</th>
+                        <th>{{obj.age}}</th>
+                        <th>{{obj.account}}</th>
+                        <th>{{obj.password}}</th>
+                        <th>{{obj.admintec.tec_account}}</th>
+                        <td>
+                            <a class="btn btn-info  btn-xs "
+                               href = "#"
+                            >详细</a>
+                            <a class="btn btn-primary btn-xs"
+                               href="/tec/{{obj.id}}/stuedit/"
+                            >编辑</a>
+                            <a class="btn btn-danger  btn-xs "
+                               href = "/tec/{{obj.id}}/studelete/"
+                            >删除</a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+              </div>
+            <ul class="pagination">
+                {{ page_string }}
+             </ul>
+        </div>
+
+
+{% endblock %}
+

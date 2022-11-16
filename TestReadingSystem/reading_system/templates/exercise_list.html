@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="container">
+    <div style="margin-bottom: 10px " class="clearfix">
+        <div style="float: left; ">
+            <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> 排序规则 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/exercise/1/list/">按编号排序</a></li>
+            <li><a href="/exercise/2/list/">按年级排序</a></li>
+          </ul>
+        </li>
+      </ul>
+        </div>
+      <div style="float: right; width: 300px;" >
+          <form method="get">
+          <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="输入题目内容" value="{{search_data}}">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                </button>
+              </span>
+            </div>
+          </form>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+          <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+          题库
+      </div>
+        <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>年级</th>
+                <th>题目内容</th>
+                <th>正误判断</th>
+                <th>出现次数</th>
+                <th>出错次数</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for obj in queryset %}
+              <tr>
+                <th>{{ obj.get_grade_display }}</th>
+                <th>{{ obj.content }}</th>
+                <th>{{ obj.get_answer_display }}</th>
+                <th>{{ obj.total_time }}</th>
+                <th>{{ obj.wrong_time }}</th>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    <ul class="pagination">
+        {{ page_string }}
+     </ul>
+</div>
+{% endblock %}

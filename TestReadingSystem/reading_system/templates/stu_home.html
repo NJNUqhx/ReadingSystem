@@ -1,0 +1,28 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+          <h1>欢迎使用阅读能力评测系统</h1>
+          <p><a type="button" class="mycss btn btn-primary btn-lg btn-info" id="test" href="/stu/turnpage/"> 点击进行测试 </a></p>
+        </div>
+        <button type="button" class="mycss btn btn-primary btn-lg btn-block"> 阅读准确性测试 </button>
+        <button type="button" class="mycss btn btn-success btn-lg btn-block"> 阅读流畅性测试一 </button>
+        <button type="button" class="mycss btn btn-danger btn-lg btn-block"> 阅读流畅性测试二 </button>
+    </div>
+{% endblock %}
+{% block css %}
+    <style>
+    h1{
+        text-align: center;
+    }
+    p{
+        text-align: center;
+    }
+    #test{
+        text-align: center;
+        margin-top: 20%;
+        margin-left:auto;
+    }
+    </style>
+{% endblock %}
