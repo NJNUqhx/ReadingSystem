@@ -8,9 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from reading_system import models
 from reading_system.utils.pagination import Pagination
-
+from reading_system.utils.chooseList import getExerciseList
 
 def stu_home(request):
+    print(getExerciseList())
     return render(request, "stu_home.html")
 
 
@@ -99,8 +100,14 @@ def stu_uploadInfo(request):
         # if dic['type'] == 3:
         #     result = models.ExerciseV3.objects.filter(content=test_dict['content'])
         #     print(result)
-        return JsonResponse({"status": True, "exercise":exercise})
+        return JsonResponse({"status": True, "exercise": exercise})
 
+def stu_uploadInfoOfTestThree(request):
+    dic = request.session.get('info')
+    if request.method == "POST":
+        exercise = get_exercise_list()[2].content
+        test_dict = request.POST
+        return JsonResponse({"status": True, "exercise": exercise})
 
 @csrf_exempt
 def stu_turnToResult(request):
@@ -109,6 +116,7 @@ def stu_turnToResult(request):
         return JsonResponse({"status": True})
 
 
+## 排行榜
 def stu_ranklist(request, test=1):
     grade = request.session.get('info')['grade']
     ranklist = models.StuTestInfo.objects.filter(grade=grade).filter(test_type=test).order_by("score").reverse()
@@ -122,23 +130,27 @@ def stu_ranklist(request, test=1):
     return render(request, "stu_ranklist.html", context)
 
 
+## 跳转界面
 def stu_turnpage(request):
     dic = request.session.get('info')
     status = dic["exercise"]
+    next_exercise = [0, 1, 2]
     tar_html = [
         "testOneIntroduction.html",
         "testTwoIntroduction.html",
         "testThreeIntroduction.html",
     ]
-    random.shuffle(tar_html)
-    if not status[0]:
+    random.shuffle(next_exercise)
+    if not status[next_exercise[0]]:
         request.session['info']['exercise'][0] = True
-        return render(request, "testOneIntroduction.html")
-    elif not status[1]:
+        return render(request, tar_html[next_exercise[0]])
+    elif not status[next_exercise[1]]:
         request.session['info']['exercise'][1] = True
-        return render(request, "testTwoIntroduction.html")
-    elif not status[2]:
+        return render(request, tar_html[next_exercise[1]])
+    elif not status[next_exercise[2]]:
         request.session['info']['exercise'][2] = True
-        return render(request, "testThreeIntroduction.html")
-
+        return render(request, tar_html[next_exercise[2]])
+    request.session['info']['exercise'][0] = False
+    request.session['info']['exercise'][1] = False
+    request.session['info']['exercise'][2] = False
     return HttpResponse("跳转页面")

@@ -27,5 +27,84 @@
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'js/stu_testOne.js' %}"></script>
+<script>
+    $(function(){
+      countTime();
+      uploadInfo();
+      checkTime();
+    })
+    let isStart = true;
+    let start = new Date();
+
+    {#记录当前学生测试情况#}
+    let info = {total: 0, wrong: 0, right: 0}
+    {#到达截止时间后跳转#}
+    function checkTime(){
+        const time = getTime();
+        if(time === "03:01") {
+            // 上传成绩并跳转结算页面
+            turnPage();
+        }
+        const t = setTimeout(function () {
+            checkTime()
+        }, 1000);
+    }
+    // 跳转界面
+    function turnPage(){
+        const text = $('#exercise').val();
+        $.ajax({
+            url: "/stu/turnToResult/",
+            type: "post",
+            data: {score:"98.3", speed: "30/45"},
+            dataType: "JSON",
+            success: function (res){
+                if(res.status)
+                    console.log("向后台传输答题情况成功")
+                    console.log(res);
+                    changeExercise(res.exercise);
+            }
+        })
+        {#跳转到结算界面#}
+        location = "/stu/testOneResult/";
+    }
+
+    // 计时模块
+    function countTime(){
+        const now = new Date();
+        if(isStart)
+        {
+            isStart=false;
+            start=now;
+        }
+        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
+        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        differ_m = checkTimeFormat(differ_m);
+        differ_s = checkTimeFormat(differ_s);
+        document.getElementById('differ_time').innerText = differ_m + ":" + differ_s;
+        t = setTimeout(function(){countTime()},500);
+    }
+    // 获取当前已经经历的时间
+    function getTime(){
+        const now = new Date();
+        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
+        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        differ_m = checkTimeFormat(differ_m);
+        differ_s = checkTimeFormat(differ_s);
+        return differ_m + ":" + differ_s;
+    }
+
+    function checkTimeFormat(i){
+        if (i<10){
+            i="0" + i;
+        }
+        return i;
+    }
+
+    // 更新题目
+    function changeExercise(new_exercise){
+        console.log("更新题目");
+        $('#exercise').text(new_exercise);
+    }
+
+    </script>
 {% endblock %}

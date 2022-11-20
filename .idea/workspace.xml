@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9835c951-650d-4edc-8774-34ee1d6d9fe7" name="变更" comment="">
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/.idea/TestReadingSystem.iml" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/.idea/TestReadingSystem.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/TestReadingSystem/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/TestReadingSystem/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/copy/stu_testOne.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/reading_system/middleware/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/reading_system/middleware/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_home.html" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_testOne.html" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_testOne.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_testThree.html" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/reading_system/templates/stu_testThree.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestReadingSystem/reading_system/views/stu.py" beforeDir="false" afterPath="$PROJECT_DIR$/TestReadingSystem/reading_system/views/stu.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2HoOXmmGc2TWeaHwAlWis0jsSzY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "D:/GitHub/ReadingSystem"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="9835c951-650d-4edc-8774-34ee1d6d9fe7" name="变更" comment="" />
+      <created>1668948011968</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1668948011968</updated>
+      <workItem from="1668948014718" duration="28000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

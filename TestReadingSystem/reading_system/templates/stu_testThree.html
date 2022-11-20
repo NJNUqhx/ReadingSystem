@@ -35,7 +35,6 @@
 {% endblock %}
 
 {% block js %}
-{#<script src="{% static 'js/stu_testOne.js' %}"></script>#}
 <script>
     $(function(){
       countTime();
@@ -51,30 +50,15 @@
     function checkTime(){
         const time = getTime();
         if(time === "03:01") {
-        console.log("turn page");
-        turnPage();
-    }
+            // 上传成绩并跳转结算页面
+            turnPage();
+        }
         const t = setTimeout(function () {
             checkTime()
         }, 1000);
     }
-    {#记录一次完整的答题情况#}
+
     function turnPage(){
-        const text = $('#exercise').val();
-        console.log(typeof text)
-        $.ajax({
-            url: "/stu/turnToResult/",
-            type: "post",
-            data: {score:"98.3", speed: "30/45"},
-            dataType: "JSON",
-            success: function (res){
-                if(res.status)
-                    console.log("向后台传输答题情况成功")
-                    console.log(res);
-                    changeExercise(res.exercise);
-            }
-        })
-        {#跳转到结算几面#}
         location = "/stu/testOneResult/";
     }
 
@@ -129,24 +113,24 @@
 
 
 
-$('#wrong').click(function(){
-    const used_time = getTime();
-    let content = $('#exercise').text();
-    $.ajax({
-        url: "/stu/uploadInfo/",
-        type: "post",
-        data: {time:used_time, choice: 1, info: info, content: content},
-        dataType: "JSON",
-        success: function (res){
-            if(res.status)
-                console.log("向后台传输答题情况成功");
-                console.log(this.data);
-                console.log(res);
-                changeExercise(res.exercise)
-        }
+    $('#wrong').click(function(){
+        const used_time = getTime();
+        let content = $('#exercise').text();
+        $.ajax({
+            url: "/stu/uploadInfo/",
+            type: "post",
+            data: {time:used_time, choice: 1, info: info, content: content},
+            dataType: "JSON",
+            success: function (res){
+                if(res.status)
+                    console.log("向后台传输答题情况成功");
+                    console.log(this.data);
+                    console.log(res);
+                    changeExercise(res.exercise)
+            }
+        })
     })
-})
-}
+    }
 
 {#修改题目#}
     function changeExercise(new_exercise){

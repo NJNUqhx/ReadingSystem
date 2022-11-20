@@ -32,6 +32,7 @@ urlpatterns = [
     path('stu/testTwoIntroduction/', stu.stu_testTwoIntroduction),
     path('stu/testThreeIntroduction/', stu.stu_testThreeIntroduction),
     path('stu/uploadInfo/', stu.stu_uploadInfo),
+    path('stu/uploadInfoOfTestThree/', stu.stu_uploadInfoOfTestThree),
     path('stu/turnToResult/', stu.stu_turnToResult),
     path('stu/ranklist/', stu.stu_ranklist),
     path('stu/ranklist/<int:test>/', stu.stu_ranklist),
