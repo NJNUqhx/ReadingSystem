@@ -8,10 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from reading_system import models
 from reading_system.utils.pagination import Pagination
-from reading_system.utils.chooseList import getExerciseList
+from reading_system.utils.chooseList import gen
 
 def stu_home(request):
-    print(getExerciseList())
+    print(gen.getChart())
     return render(request, "stu_home.html")
 
 
@@ -43,13 +43,23 @@ def stu_testOne(request):
 
 @csrf_exempt
 def stu_testOneResult(request):
-    dic = request.session.get('info')
-    # 获取最近的一次测试信息
-    test_info = models.StuTestInfo.objects.filter(stu_account=dic['account']).order_by("id").last()
 
-    # total = models.StuTestInfo.objects.filter(grade=dic['grade'], test_type=dic['type']).count()
-    # greater = models.StuTestInfo.objects.filter(grade=dic['grade'], test_type=dic['type']).count()
-    # # 获取最新一次的记录
+    context = {
+        "speed": "每分钟阅读正确5个汉字",
+        "rank": "24/180",
+    }
+    return render(request, "stu_testOneResult.html", context)
+
+
+def stu_testTwoResult(request):
+    context = {
+        "speed": "每分钟阅读正确5个汉字",
+        "rank": "24/180",
+    }
+    return render(request, "stu_testOneResult.html", context)
+
+
+def stu_testThreeResult(request):
     context = {
         "content": "读错的汉字或句子",
         "speed": "每分钟阅读正确5个汉字",
@@ -58,7 +68,6 @@ def stu_testOneResult(request):
         "extra": "其他信息"
     }
     return render(request, "stu_testOneResult.html", context)
-
 
 # 获取对应年级的题目
 def get_exercise_list(grade=1):

@@ -50,7 +50,6 @@ class StuTestInfo(models.Model):
         (6, "六年级"),
     )
     grade = models.SmallIntegerField(verbose_name="年级", null=True, default=1, choices=grade_choices)
-
     time = models.DateTimeField(verbose_name="时间", default=timezone.now, null=False)
     type_choices = (
         (1, "准确性测试"),
@@ -88,3 +87,30 @@ class ExerciseV3(models.Model):
         (2, "错误"),
     )
     answer = models.SmallIntegerField(verbose_name="正误", choices=answer_choices, default=1)
+
+class ExerciseV1Result(models.Model):
+    stu_account = models.CharField(verbose_name="账号", max_length=32, default="njnustu")
+    total_characters = models.IntegerField(verbose_name="总字数", default=0)
+    score = models.DecimalField(verbose_name="分数", default=0, decimal_places=2, max_digits=3)
+    # 排名实时计算
+    accuracy_rate = models.DecimalField(verbose_name="正确率", default=0, decimal_places=2, max_digits=3)
+
+class ExerciseV2Result(models.Model):
+    stu_account = models.CharField(verbose_name="账号", max_length=32, default="njnustu")
+    total_characters = models.IntegerField(verbose_name="总字数", default=0)
+    wrong_characters = models.IntegerField(verbose_name="错误数", default=0)
+    score = models.DecimalField(verbose_name="分数",default=0, decimal_places=2, max_digits=3)
+    test_time = models.CharField(verbose_name="测试用时", max_length=100, default=60)
+    # 排名实时计算
+    accuracy_rate = models.DecimalField(verbose_name="正确率", default=0, decimal_places=2, max_digits=3)
+    avg_speed = models.DecimalField(verbose_name="平均阅读速度", default=0, decimal_places=2, max_digits=3)
+
+
+class ExerciseV3Result(models.Model):
+    stu_account = models.CharField(verbose_name="账号", max_length=32, default="njnustu")
+    score = models.DecimalField(verbose_name="分数",default=0,decimal_places=2,max_digits=3)
+    total_characters = models.IntegerField(verbose_name="总字数", default=0)
+    wrong_characters = models.IntegerField(verbose_name="错误数", default=0)
+    # 排名实时计算
+    accuracy_rate = models.DecimalField(verbose_name="正确率", default=0, decimal_places=2,max_digits=3)
+    avg_speed = models.DecimalField(verbose_name="平均阅读速度", default=0, decimal_places=2,max_digits=3)
