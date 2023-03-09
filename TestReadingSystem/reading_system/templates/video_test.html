@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>实现在网页上录音</title>
+</head>
+<body>
+<div class="app">
+<button class="record-btn">record</button>
+<audio controls class="audio-player" ></audio>
+</div>
+<script>
+let cur_time = new Date();
+let name = "";
+let recording = false;
+name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
++ cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+console.log(name);
+
+const file_name = () => {
+    cur_time = new Date();
+    name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
++ cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+    return name;
+};
+
+if (navigator.mediaDevices.getUserMedia) {
+    const constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(
+        stream => {
+            const recordBtn = document.querySelector(".record-btn");
+            const mediaRecorder = new MediaRecorder(stream);
+            var chunks = [];
+            recordBtn.onclick = () => {
+                if (recording === false) {
+                    recording = true;
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+
+                    recordBtn.textContent = "stop";
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+                        const audioSrc = document.querySelector(".audio-player");
+                        audioSrc.src = audioURL;
+
+
+                        const element = document.createElement("a");
+                        element.setAttribute("href", audioURL);
+                        name = file_name();
+                        element.setAttribute("download", name);
+                        element.click();
+
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+                    }
+                }
+            }
+        }
+    )}
+
+</script>
+</body>
+</html>

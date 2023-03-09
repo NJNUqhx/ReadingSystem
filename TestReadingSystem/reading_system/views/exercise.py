@@ -10,14 +10,79 @@ from reading_system.utils.pagination import Pagination
 def exercise_list(request, nid=0):
     data_dict = {}
     search_data = request.GET.get('q', "")
+    grade = request.GET.get('grade', 0)
     if search_data:
         data_dict["content__contains"] = search_data
+
+    queryset = models.Exercise.objects.filter(**data_dict)
+
     if nid == 1:
-        queryset = models.ExerciseV3.objects.filter(**data_dict).order_by("id")
+        queryset = models.Exercise.objects.filter(**data_dict).order_by("accuracy")
     elif nid == 2:
-        queryset = models.ExerciseV3.objects.filter(**data_dict).order_by("grade")
+        queryset = models.Exercise.objects.filter(**data_dict).order_by("-accuracy")
+
+    page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+        "grade": grade
+    }
+    return render(request, "exercise_list.html", context)
+
+
+def character_list(request, nid=0, grade=0):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    grade = request.GET.get('grade', 0)
+    if search_data:
+        data_dict["character__contains"] = search_data
+
+    if grade == 0:
+        queryset = models.Character.objects.filter(**data_dict)
+
+        if nid == 1:
+            queryset = models.Character.objects.filter(**data_dict).order_by("accuracy")
+        elif nid == 2:
+            queryset = models.Character.objects.filter(**data_dict).order_by("-accuracy")
+        page_object = Pagination(request, queryset)
     else:
-        queryset = models.ExerciseV3.objects.filter(**data_dict).order_by("id")
+        data_dict["grade"] = grade
+        queryset = models.CharacterOfGrade.objects.filter(**data_dict)
+        if nid == 1:
+            queryset = models.CharacterOfGrade.objects.filter(**data_dict).order_by("accuracy")
+        elif nid == 2:
+            queryset = models.CharacterOfGrade.objects.filter(**data_dict).order_by("-accuracy")
+        page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+        "grade": grade
+    }
+    return render(request, "character_list.html", context)
+
+
+def exercise_testOneList(request, nid=0):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    if search_data:
+        data_dict["name__contains"] = search_data
+
+    queryset = models.ExerciseV1Result.objects.filter(**data_dict)
+
+    if nid == 1:
+        queryset = models.ExerciseV1Result.objects.filter(**data_dict).order_by("-score")
+    elif nid == 2:
+        queryset = models.ExerciseV1Result.objects.filter(**data_dict).order_by("-exercise_time")
+    elif nid == 3:
+        queryset = models.ExerciseV1Result.objects.filter(**data_dict).order_by("-accuracy_rate")
     page_object = Pagination(request, queryset)
 
     page_queryset = page_object.query_set
@@ -27,7 +92,80 @@ def exercise_list(request, nid=0):
         "search_data": search_data,
         "page_string": page_string,
     }
-    return render(request, "exercise_list.html", context)
+    return render(request, "exercise_listOne.html", context)
 
 
+def exercise_testTwoList(request, nid=0):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    if search_data:
+        data_dict["name__contains"] = search_data
 
+    queryset = models.ExerciseV2Result.objects.filter(**data_dict)
+
+    if nid == 1:
+        queryset = models.ExerciseV2Result.objects.filter(**data_dict).order_by("-score")
+    elif nid == 2:
+        queryset = models.ExerciseV2Result.objects.filter(**data_dict).order_by("-exercise_time")
+    elif nid == 3:
+        queryset = models.ExerciseV2Result.objects.filter(**data_dict).order_by("-accuracy_rate")
+    elif nid == 4:
+        queryset = models.ExerciseV2Result.objects.filter(**data_dict).order_by("-avg_speed")
+    page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+    }
+    return render(request, "exercise_listTwo.html", context)
+
+
+def exercise_testThreeList(request, nid=0):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    if search_data:
+        data_dict["name__contains"] = search_data
+
+    queryset = models.ExerciseV3Result.objects.filter(**data_dict)
+
+    if nid == 1:
+        queryset = models.ExerciseV3Result.objects.filter(**data_dict).order_by("-score")
+    elif nid == 2:
+        queryset = models.ExerciseV3Result.objects.filter(**data_dict).order_by("-exercise_time")
+    elif nid == 3:
+        queryset = models.ExerciseV3Result.objects.filter(**data_dict).order_by("-judge_accuracy")
+    elif nid == 4:
+        queryset = models.ExerciseV3Result.objects.filter(**data_dict).order_by("-accuracy_rate")
+    page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+    }
+    return render(request, "exercise_listThree.html", context)
+
+
+def recognition_list(request):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    if search_data:
+        data_dict["target__contains"] = search_data
+
+    queryset = models.WavRecognitionResult.objects.filter(**data_dict).order_by("-exercise_time")
+
+    page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+    }
+    return render(request, "recognition_list.html", context)

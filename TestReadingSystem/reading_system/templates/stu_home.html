@@ -4,17 +4,17 @@
     <div class="container">
         <div class="jumbotron">
           <h1>欢迎使用阅读能力评测系统</h1>
-          <p><a type="button" class="mycss btn btn-primary btn-lg btn-info" id="test" href="/stu/turnpage/"> 点击进行测试 </a></p>
         </div>
         <a type="button" class="mycss btn btn-primary btn-lg btn-block" href="/stu/testOne/"> 阅读准确性测试 </a>
-        <a type="button" class="mycss btn btn-success btn-lg btn-block" href="/stu/testTwo/"> 阅读流畅性测试一 </a>
-        <a type="button" class="mycss btn btn-danger btn-lg btn-block" href="/stu/testThree/"> 阅读流畅性测试二 </a>
+{#        <a type="button" class="mycss btn btn-success btn-lg btn-block" href="#"> 阅读流畅性测试一 </a>#}
+        <a type="button" class="mycss btn btn-success btn-lg btn-block" href="/stu/testThree/"> 阅读流畅性测试 </a>
     </div>
 {% endblock %}
 {% block css %}
     <style>
     h1{
         text-align: center;
+        margin-bottom: 30%;
     }
     p{
         text-align: center;
@@ -23,6 +23,9 @@
         text-align: center;
         margin-top: 20%;
         margin-left:auto;
+    }
+    button{
+        width: 100%;
     }
     </style>
 {% endblock %}

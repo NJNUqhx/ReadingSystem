@@ -4,11 +4,15 @@ import datetime
 import re
 import pandas as pd
 from numpy import *
+from pypinyin import pinyin
 
 LISTNUM = 10
 
 
 class Gen_chart:
+    def change_LISTNUM(self, num):
+        self.LISTNUM = num
+
     def excel_to_dict(self, filename, **kwargs):
         df = pd.read_excel(filename)
         hanzi_list = df['汉字'].tolist()
@@ -89,8 +93,11 @@ class Gen_chart:
 
     def __init__(self, file1, file2):
         self.res = {}
+        self.charList = []
+        self.pinyindic = {}
         self.hanzi_dict2 = {}
         self.hanzi_dict2 = self.excel_to_dict(file2)
+        self.LISTNUM = 10
         dict_key_ls = list(self.hanzi_dict2.keys())
         random.shuffle(dict_key_ls)
         hanzi_dict = {}
@@ -104,6 +111,7 @@ class Gen_chart:
         # 声符 结构方式 笔画数
         for char in hanzi_dict:
             feathers = hanzi_dict[char]
+            self.pinyindic[char] = []
             charlist = []
             charlist2 = []
             featherlist = []
@@ -124,6 +132,12 @@ class Gen_chart:
                 ceshu = ceshu[0]
             else:
                 ceshu = feathers['汉字在课本中首次出现的册数'][0]
+            if len(feathers['拼音']) == 2:
+                self.pinyindic[char].append(feathers['拼音'][1])
+            else:
+                pinyins = feathers['拼音'][1].split(';')
+                self.pinyindic[char].append(pinyins[0])
+                self.pinyindic[char].append(feathers['拼音'][2])
             if zipin != '':
                 if (float(zipin) == 0):
                     charlist.append(float('-inf'))
@@ -157,7 +171,125 @@ class Gen_chart:
                 a[i] = float(a[i])
             self.res[(a[0], a[1], a[2])] = group
 
+    # 比较汉字
+    def compareChar(self, ch1, ch2):
+        list1 = pinyin(ch1, heteronym=True)[0]
+        list2 = pinyin(ch2, heteronym=True)[0]
+        for elem in list1:
+            if elem in list2:
+                return True
+        return False
+
+
+    def compareSentenceRight(self, str1, str2):
+        res = ""
+        mark = 0
+        i = 0
+        j = 0
+        cnt = 0
+        for i in range(len(str1)):
+            if (self.compareChar(str1[i], str2[j])):
+                res = res + str2[j]
+                cnt += 1
+                i += 1
+                j += 1
+                mark = j
+            else:
+                j += 1
+                if (j == len(str2) - 1):
+                    i += 1
+                    j = mark
+        return res
+    # 比较句子
+    def compareSentence(self, str1, str2):
+        mark = 0
+        i = 0
+        j = 0
+        cnt = 0
+        for i in range(len(str1)):
+            if (self.compareChar(str1[i], str2[j])):
+                cnt += 1
+                i += 1
+                j += 1
+                mark = j
+            else:
+                j += 1
+                if (j == len(str2) - 1):
+                    i += 1
+                    j = mark
+        return cnt
+
+    # 阅读流畅性测试1
+    def getChart2(self):
+        cnt = 0
+        for a in self.res:
+            group = self.res[a]
+            cnt += 1
+            if (cnt > 2):
+                break
+            i = 0
+            while i < 48:
+                idx = random.randint(0, len(group) - 1)
+                if group[idx] not in self.charList:
+                    self.charList.append(group[idx])
+                    i += 1
+        return self.charList
+
     def getChart(self):
+        self.resultList = []
+        groupnum = 0
+        for a in self.res:
+            i = a
+            group = self.res[a]
+            shenfu = []
+            choseshenfu = []
+            jiegou = [[], [], [], [], []]
+            jiegous = []
+            chosenjiegou = [0, 0, 0, 0, 0]
+            bihua = []
+            zipins = []
+            result = []
+            cnt = 0
+            groupnum += 1
+            for char in group:
+                feathers = self.hanzi_dict2[char]
+                shenfu.append(feathers['声符'])
+                jiegous.append(int(feathers['结构方式']))
+                jiegou[int(feathers['结构方式'])].append(char)
+                bihua.append(int(feathers['笔画数']))
+                if isinstance(feathers['字频'], float):
+                    zipin = feathers['字频']
+                elif isinstance(feathers['字频'], str):
+                    str_list = feathers['字频'].split(';')
+                    zipin = str_list[0]
+                else:
+                    zipin = feathers['字频'][0]
+                    if isinstance(zipin, str):
+                        str_list = zipin.split(';')
+                        zipin = str_list[0]
+                zipin = float(zipin)
+                zipins.append(zipin)
+            meanbihua = mean(bihua)
+            stabihua = std(bihua)
+            while (cnt < self.LISTNUM):
+                idx = random.randint(0, len(group) - 1)
+                if group[idx] not in result:
+                    if bihua[idx] >= meanbihua - stabihua:
+                        if bihua[idx] <= meanbihua + stabihua:
+                            if zipins[idx] >= i[0] - i[1]:
+                                if zipins[idx] <= i[0] + i[1]:
+                                    if shenfu[idx] not in choseshenfu or shenfu[idx] == '':
+                                        if chosenjiegou[jiegous[idx]] <= round(
+                                                len(jiegou[jiegous[idx]]) * self.LISTNUM / len(group)):
+                                            # result.append((group[idx], groupnum))
+                                            result.append(group[idx])
+                                            chosenjiegou[jiegous[idx]] += 1
+                                            choseshenfu.append(shenfu[idx])
+                                            cnt += 1
+            self.resultList.append(result)
+        return self.resultList
+
+    def getChartOriginal(self):
         resultList = []
         groupnum = 0
         for a in self.res:
@@ -211,6 +343,7 @@ class Gen_chart:
         return resultList
 
 
+
 file = 'reading_system/static/character/hanzi1.xlsx'
 gen = Gen_chart(open('reading_system/static/character/2.txt', mode='r'), file)
-# print(gen.getChart())
+

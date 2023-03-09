@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>阅读能力评测系统</title>
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-datepicker/css/bootstrap-datepicker.css' %}">
     {% block css %}
     {% endblock %}
     <style>
@@ -14,6 +15,10 @@
         }
         td{
             text-align: center;
+        }
+        body{
+            background-image: url({% static 'img/background.jpg' %});
+            background-size: cover;
         }
     </style>
 </head>
@@ -35,13 +40,23 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li><a href="/tec/stulist/">学生信息</a></li>
-        <li><a href="/tec/testlist/">学生测试</a></li>
-        <li><a href="/exercise/list/">题库管理</a></li>
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> 评测结果 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/tec/testlist/one/">准确性测试</a></li>
+            <li><a href="/tec/testlist/two/">流畅性测试一</a></li>
+            <li><a href="/tec/testlist/three/">流畅性测试二</a></li>
+          </ul>
+
+        </li>
+        <li><a href="/character/list/">汉字题库</a></li>
+        <li><a href="/exercise/list/">语句题库</a></li>
+        <li><a href="/tec/recognition/list/">识别结果</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-              {{ request.session.info.tec_account }} <span class="caret"></span></a>
+              {{ request.session.info.account }} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="/tec/login/">登录</a></li>
             <li><a href="/tec/logout/">注销</a></li>
@@ -61,6 +76,8 @@
 
     <script src="{% static 'js/jquery-3.6.1.min.js' %}"></script>
     <script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
     {% block js %}
     {% endblock %}
 </body>

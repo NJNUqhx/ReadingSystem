@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<button id="download">点击下载表格</button>
+{% endblock %}
+
+{% block js %}
+<script>
+const btn = document.querySelector("#download");
+btn.onclick = () =>{
+    const req = new XMLHttpRequest();
+    req.open('POST', '/excel/upload/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/json'); //设置请求头
+    const body = {}
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = '结果.xls'; //下载后文件名
+         // a.download = unescape(req.headers.filr)
+         a.click();
+         // self.download(blobUrl);
+    };
+}
+</script>
+{% endblock %}

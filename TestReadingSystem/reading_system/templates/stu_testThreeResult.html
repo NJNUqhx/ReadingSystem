@@ -1,0 +1,64 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <p><button type="button" class="btn btn-success btn-lg" >测评结果</button></p>
+        <div class="bs-example" data-example-id="contextual-panels">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">阅读错误的汉字</h3>
+      </div>
+      <div class="panel-body" style="text-align: center;">
+          {{ wrong }}
+      </div>
+    </div>
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">阅读正确汉字的速度</h3>
+      </div>
+      <div class="panel-body" style="text-align: center;">
+          {{ speed }}
+      </div>
+    </div>
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">在同龄人中的排位</h3>
+      </div>
+      <div class="panel-body" style="text-align: center;">
+          {{ rank }}
+      </div>
+    </div>
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+        <h3 class="panel-title"  style="text-align: center;">分数</h3>
+      </div>
+      <div class="panel-body"  style="text-align: center;">
+          {{ score }}
+      </div>
+    </div>
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+        <h3 class="panel-title"  style="text-align: center;">判断句子正确率</h3>
+      </div>
+      <div class="panel-body" style="text-align: center;">
+          {{ accuracy }}
+      </div>
+    </div>
+  </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+    <style>
+    button{
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+    }
+    p{
+        text-align: center;
+    }
+    </style>
+{% endblock %}

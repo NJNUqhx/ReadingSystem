@@ -49,15 +49,16 @@
                         <th>{{obj.password}}</th>
                         <th>{{obj.admintec.tec_account}}</th>
                         <td>
-                            <a class="btn btn-info  btn-xs "
-                               href = "#"
-                            >详细</a>
                             <a class="btn btn-primary btn-xs"
                                href="/tec/{{obj.id}}/stuedit/"
                             >编辑</a>
                             <a class="btn btn-danger  btn-xs "
                                href = "/tec/{{obj.id}}/studelete/"
                             >删除</a>
+                            <button class="btn btn-info  btn-xs " id="download1"
+                            onclick="downloadCorrect('{{ obj.name }}')">准确性测试</button>
+                            <button class="btn btn-success  btn-xs " id="download2"
+                            onclick="downloadFluent('{{ obj.name }}')">流畅性测试</button>
                         </td>
                       </tr>
                     {% endfor %}
@@ -72,3 +73,53 @@
 
 {% endblock %}
 
+{% block js %}
+<script>
+function print(s){
+    console.log(s);
+}
+
+function downloadCorrect(name){
+
+    console.log("阅读正确性" + name);
+
+    const req = new XMLHttpRequest();
+    req.open('POST', '/download/5/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); //设置请求头
+    const body = "name=" + name;
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = '阅读准确性测试' + name + '.xls'; //下载后文件名
+         a.click();
+    }
+}
+
+function downloadFluent(name){
+
+    console.log("阅读流畅性" + name);
+
+    const req = new XMLHttpRequest();
+    req.open('POST', '/download/6/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); //设置请求头
+    const body = "name="+name
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = '阅读流畅性测试' + name +'.xls'; //下载后文件名
+         a.click();
+    }
+
+}
+</script>
+{% endblock %}

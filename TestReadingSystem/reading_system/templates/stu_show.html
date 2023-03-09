@@ -24,7 +24,7 @@
                 <table class="table table-bordered">
                     <thead>
                       <tr>
-                        <th>测试时间</th>
+{#                        <th>测试时间</th>#}
                         <th>测试类型</th>
                         <th>测试分数</th>
                         <th>操作</th>
@@ -33,14 +33,10 @@
                     <tbody>
                     {% for obj in queryset %}
                       <tr>
-                        <th>{{obj.time|date:"Y-m-d H:i"}}</th>
+{#                        <th>{{obj.time|date:"Y-m-d H:i"}}</th>#}
                         <th>{{obj.get_test_type_display}}</th>
                         <th>{{obj.score}}</th>
-                        <td>
-                            <a class="btn btn-info  btn-xs "
-                               href = "#"
-                            >详细</a>
-                        </td>
+
                       </tr>
                     {% endfor %}
                     </tbody>

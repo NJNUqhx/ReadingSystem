@@ -16,30 +16,31 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from reading_system.views import stu, tec, exercise, account
+from reading_system.views import stu, tec, exercise, account, function
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
+    path('', account.stu_login),
     path('stu/login/', account.stu_login),
     path('stu/logout/', account.stu_logout),
     path('stu/home/', stu.stu_home),
-    path('stu/show/', stu.stu_show),
-    path('stu/<int:nid>/show/', stu.stu_show),
     path('stu/testOne/', stu.stu_testOne),
     path('stu/testOneResult/', stu.stu_testOneResult),
+    path('stu/testTwo/', stu.stu_testTwo),
+    path('stu/testTwoResult/', stu.stu_testTwoResult),
     path('stu/testThree/', stu.stu_testThree),
+    path('stu/testThreeResult/', stu.stu_testThreeResult),
     path('stu/testOneIntroduction/', stu.stu_testOneIntroduction),
     path('stu/testTwoIntroduction/', stu.stu_testTwoIntroduction),
     path('stu/testThreeIntroduction/', stu.stu_testThreeIntroduction),
-    path('stu/uploadInfo/', stu.stu_uploadInfo),
-    path('stu/uploadInfoOfTestThree/', stu.stu_uploadInfoOfTestThree),
+
     path('stu/turnToResult/', stu.stu_turnToResult),
     path('stu/ranklist/', stu.stu_ranklist),
     path('stu/ranklist/<int:test>/', stu.stu_ranklist),
     path('stu/turnpage/', stu.stu_turnpage),
 
     path('tec/login/', account.tec_login),
-    path('tec/logout', account.tec_logout),
+    path('tec/logout/', account.tec_logout),
     path('tec/stulist/', tec.tec_stulist),
     path('tec/stuadd/', tec.tec_stuadd),
     path('tec/<int:nid>/stuedit/', tec.tec_stuedit),
@@ -49,6 +50,35 @@ urlpatterns = [
     path('tec/<int:nid>/testlist/', tec.tec_testlist),
 
     path('exercise/list/', exercise.exercise_list),
+    path('character/list/', exercise.character_list),
     path('exercise/<int:nid>/list/', exercise.exercise_list),
+    path('character/<int:nid>/list/', exercise.character_list),
 
+    path('tec/testlist/one/', exercise.exercise_testOneList),
+    path('tec/testlist/two/', exercise.exercise_testTwoList),
+    path('tec/testlist/three/', exercise.exercise_testThreeList),
+    path('tec/testlist/one/<int:nid>/', exercise.exercise_testOneList),
+    path('tec/testlist/two/<int:nid>/', exercise.exercise_testTwoList),
+    path('tec/testlist/three/<int:nid>/', exercise.exercise_testThreeList),
+
+    # 获取准确性题目
+    path('stu/exercise/list/<int:nid>/', stu.get_exercise_list),
+    # 准确性测试一识别语句
+    path('stu/recognition/<int:nid>/', stu.stu_recognizeSpeech),
+    # 上传成绩
+    path('stu/uploadInfo/<int:nid>/', stu.stu_uploadInfo),
+
+    path('stu/show/list/<int:nid>/', stu.stu_showList),
+
+    # 识别结果
+    path('tec/recognition/list/', exercise.recognition_list),
+
+    path('speech/save/', stu.stu_saveSpeech),
+
+    # 测试函数
+    path('excel/upload/', function.upload_excel),
+
+    path('test/upload/', function.test_upload),
+
+    path('download/<int:nid>/', function.download_excel)
 ]

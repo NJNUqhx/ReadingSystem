@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div style="margin-bottom: 10px " class="clearfix">
+        <div style="float: left; ">
+            <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> 排序规则 <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/tec/testlist/two/1/">按成绩排序</a></li>
+            <li><a href="/tec/testlist/two/2/">按时间排序</a></li>
+            <li><a href="/tec/testlist/two/3/">按识字正确率排序</a></li>
+            <li><a href="/tec/testlist/two/4/">按平均阅读速度排序</a></li>
+          </ul>
+        </li>
+      </ul>
+        </div>
+      <div style="float: right; width: 300px;" >
+          <form method="get">
+          <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="输入学生姓名" value="{{search_data}}">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                </button>
+              </span>
+            </div>
+          </form>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+          <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+          学生信息列表
+      </div>
+        <table class="table table-bordered" style="text-align: center;">
+            <thead>
+              <tr>
+                <th>年级</th>
+                <th>学生</th>
+                <th>账号</th>
+                <th>测试时间</th>
+                <th>识别总字数</th>
+                <th>识字正确率</th>
+                <th>识别错误汉字</th>
+                <th>分数</th>
+                <th>测试用时(秒)</th>
+                <th>平均阅读速度(个/秒)</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for obj in queryset %}
+              <tr>
+                <th>{{ obj.get_grade_display }}</th>
+                <th>{{obj.name}}</th>
+                <th>{{obj.stu_account}}</th>
+                <th>{{obj.exercise_time|date:"Y-m-d H:i"}}</th>
+                <th>{{obj.total_characters}}</th>
+                <th>{{obj.accuracy_rate}}</th>
+                <th>{{obj.wrong }}</th>
+                <th>{{obj.score}}</th>
+                <th>{{obj.test_time}}</th>
+                <th>{{obj.avg_speed}}</th>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    <div>
+{#        <input type="text" id="start" placeholder="起始时间">#}
+{#            <input type="text" id="end" placeholder="终止时间">#}
+            <button id="download" class="btn btn-success">导出为Excel</button>
+    </div>
+    <ul class="pagination">
+        {{ page_string }}
+     </ul>
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+    <script>
+    $(function(){
+        $('#start').datepicker({
+            format:"yyyy-mm-dd",
+            startDate:'2023-3-8',
+            language: 'zh-CN',
+            autoclose: true
+        })
+        $('#end').datepicker({
+            format:"yyyy-mm-dd",
+            startDate:'2023-3-8',
+            language: 'zh-CN',
+            autoclose: true
+        })
+    })
+    const btn = document.querySelector("#download");
+    btn.onclick = () =>{
+    const req = new XMLHttpRequest();
+    req.open('POST', '/download/3/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/json'); //设置请求头
+    const body = {}
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = '阅读流畅性测试.xls'; //下载后文件名
+         a.click();
+    };
+}
+    </script>
+{% endblock %}

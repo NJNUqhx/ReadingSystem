@@ -5,19 +5,28 @@
     <div style="margin-bottom: 10px " class="clearfix">
         <div style="float: left; ">
             <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
+            <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> 排序规则 <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="/exercise/1/list/">按编号排序</a></li>
-            <li><a href="/exercise/2/list/">按年级排序</a></li>
+            <li><a href="/exercise/1/list/">按正确率升序排序</a></li>
+            <li><a href="/exercise/2/list/">按正确率降序排序</a></li>
           </ul>
         </li>
       </ul>
         </div>
       <div style="float: right; width: 300px;" >
           <form method="get">
+              <select name="grade" class="form-control" id="grade">
+                  <option value="0">选择查看年级</option>
+                  <option value="1">一年级</option>
+                  <option value="2">二年级</option>
+                  <option value="3">三年级</option>
+                  <option value="4">四年级</option>
+                  <option value="5">五年级</option>
+                  <option value="6">六年级</option>
+              </select>
           <div class="input-group">
-              <input type="text" name="q" class="form-control" placeholder="输入题目内容" value="{{search_data}}">
+              <input type="text" name="q" class="form-control" placeholder="输入查询句子" value="{{search_data}}">
               <span class="input-group-btn">
                 <button class="btn btn-default" type="submit">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -30,33 +39,61 @@
     <div class="panel panel-default">
       <div class="panel-heading">
           <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-          题库
+          语句题库
       </div>
         <table class="table table-bordered">
             <thead>
               <tr>
-                <th>年级</th>
-                <th>题目内容</th>
-                <th>正误判断</th>
-                <th>出现次数</th>
-                <th>出错次数</th>
+                <th>语句</th>
+{#                <th>正误</th>#}
+                <th>出现总次数</th>
+                <th>回答正确次数</th>
+                <th>正确率</th>
               </tr>
             </thead>
             <tbody>
             {% for obj in queryset %}
               <tr>
-                <th>{{ obj.get_grade_display }}</th>
                 <th>{{ obj.content }}</th>
-                <th>{{ obj.get_answer_display }}</th>
-                <th>{{ obj.total_time }}</th>
-                <th>{{ obj.wrong_time }}</th>
+{#                <th>{{ obj.answer }}</th>#}
+                <th>{{ obj.total }}</th>
+                <th>{{ obj.right }}</th>
+                <th>{{ obj.accuracy }}</th>
               </tr>
             {% endfor %}
             </tbody>
           </table>
       </div>
+    <div>
+        <button id="download" class="btn btn-success">导出为Excel</button>
+    </div>
     <ul class="pagination">
         {{ page_string }}
      </ul>
 </div>
+{% endblock %}
+{% block js %}
+<script>
+const btn = document.querySelector("#download");
+btn.onclick = () =>{
+    grade = $('#grade').val();
+    var arr = ["所有","一","二","三","四","五","六"];
+    alert("正在打印" + arr[grade] + "年级的语句题库统计结果");
+    const req = new XMLHttpRequest();
+    req.open('POST', '/download/1/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); //设置请求头
+    const body = "grade=" + grade
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = arr[grade] + '年级语句题库.xls'; //下载后文件名
+         a.click();
+    };
+}
+</script>
 {% endblock %}

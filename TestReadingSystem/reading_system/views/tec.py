@@ -4,8 +4,13 @@ from reading_system import models
 from reading_system.utils.pagination import Pagination
 from reading_system.utils.form import StuModelForm, StuEditModelForm
 
-
+# 教师端主页
 def tec_stulist(request):
+    # 验证登录状态
+    info = request.session.get("info")
+    if not info:
+        return redirect("/tec/login/")
+
     data_dict = {}
     search_data = request.GET.get('q', "")
     if search_data:

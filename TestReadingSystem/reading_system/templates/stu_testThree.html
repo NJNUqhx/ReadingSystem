@@ -1,18 +1,18 @@
-{% extends 'layout_stu.html' %}
+ {% extends 'layout_stu.html' %}
 {% load static %}
 
 {% block content %}
 
 <div class="container">
-    <div class="jumbotron" >
-        <div>
-            <h3 id="exercise">{{ exercise.content }}</h3>
-            <form method="post">
-                <button type="button" class="btn btn-success btn-lg" id="right" style="float: right"> 对 </button>
-                <button type="button" class="btn btn-danger btn-lg" id="wrong" style="float: right"> 错 </button>
-                <button type="button" class="btn btn-primary btn-lg " id="start"> 开始 </button>
-                <label type="button" class="btn btn-info btn-lg" id="differ_time">00:00</label>
-            </form>
+    <div class="jumbotron area" >
+        <div id="exercise-area">
+            <label id="exercise">字</label>
+        </div>
+        <div class="answer-area">
+            <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
+            <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
+            <button type="button" class="btn btn-success btn-lg " id="right-btn">正确</button>
+            <button type="button" class="btn btn-danger btn-lg " id="wrong-btn">错误</button>
         </div>
     </div>
 </div>
@@ -20,16 +20,27 @@
 
 {% block css %}
 <style>
-    h1{
-        font-size: 300px;
+    label{
+        font-size: 100px;
         text-align: center;
-        height: 450px;
-        line-height: 450px;
+        vertical-align: middle;
     }
-    h3 {
+    #right-btn{
+        float: right;
+    }
+
+    #wrong-btn{
+        float: right;
+    }
+
+    .area{
+        height: 720px;
+    }
+    .answer-area{
+        margin-top: 380px;
+    }
+    .exercise-area{
         text-align: center;
-        margin: 25% auto;
-        font-size: 60px;
     }
 </style>
 {% endblock %}
@@ -37,31 +48,29 @@
 {% block js %}
 <script>
     $(function(){
-      countTime();
-      uploadInfo();
-      checkTime();
+      getExerciseList();
     })
     let isStart = true;
     let start = new Date();
+    let begin = false;
 
-    {#记录当前学生测试情况#}
-    let info = {total_exercise: 0, do_wrong: 0, do_right: 0}
-    {#到达截止时间后跳转#}
-    function checkTime(){
-        const time = getTime();
-        if(time === "03:01") {
-            // 上传成绩并跳转结算页面
-            turnPage();
-        }
-        const t = setTimeout(function () {
-            checkTime()
-        }, 1000);
-    }
+    let info = {"total": 0, "right": 0, "time": 0, "wrong": "", "judge_all": 0, "judge_right": 0};
 
-    function turnPage(){
-        location = "/stu/testOneResult/";
-    }
+    let cur_time = new Date();
+    let name = "";
+    name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
+    + cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
 
+    const file_name = () => {
+        cur_time = new Date();
+        name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
+    + cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+        return name;
+    };
+
+    let group = 0;
+
+    // 计时模块
     function countTime(){
         const now = new Date();
         if(isStart)
@@ -69,20 +78,27 @@
             isStart=false;
             start=now;
         }
-        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
-        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        let differ_s = parseInt((now - start) / 1000 % 60);
+        let differ_m = parseInt((now - start) / 1000 / 60);
         differ_m = checkTimeFormat(differ_m);
         differ_s = checkTimeFormat(differ_s);
         document.getElementById('differ_time').innerText = differ_m + ":" + differ_s;
         t = setTimeout(function(){countTime()},500);
     }
+    // 获取当前已经经历的时间
     function getTime(){
         const now = new Date();
-        let differ_m = (now.getMinutes() - start.getMinutes() + 60) % 60;
-        let differ_s = (now.getSeconds() - start.getSeconds() + 60) % 60;
+        let differ_s = (now - start) / 1000 % 60;
+        let differ_m = (now - start) / 1000 / 60;
         differ_m = checkTimeFormat(differ_m);
         differ_s = checkTimeFormat(differ_s);
+
         return differ_m + ":" + differ_s;
+    }
+
+    function getSeconds(){
+        const now = new Date();
+        return parseInt((now - start) / 1000);
     }
 
     function checkTimeFormat(i){
@@ -92,51 +108,252 @@
         return i;
     }
 
-    function uploadInfo(){
-    $('#right').click(function(){
-        const used_time = getTime();
-        let content = $('#exercise').text();
+    let exercises = [];
+    let idx = 0;
+    let pre_exercises = {"content":"", "correct":true};
+    let cur_exercises = {"content":"", "correct":true};
+    function getExerciseList(){
         $.ajax({
-            url: "/stu/uploadInfo/",
+            url: "/stu/exercise/list/2/",
             type: "post",
-            data: {time:used_time, choice: 1, info: info, content: content},
-            dataType: "JSON",
-            success: function (res){
-                if(res.status)
-                    console.log("向后台传输答题情况成功");
-                    console.log(this.data);
-                    console.log(res);
-                    changeExercise(res.exercise)
+            success: function (resp){
+                exercises = resp.list;
+                console.log(exercises);
+            },
+            error:function(){
+                console.log("error");
             }
         })
-    })
+    }
+
+    let recording = false;
+    let wav_name = "";
+    let wrong = "";
+
+    function checkTime(){
+        if(idx === exercises.length || getSeconds() > 180){
+            $.ajax({
+                url: "/stu/uploadInfo/2/",
+                type: "post",
+                data: {
+                    "total": info.total,
+                    "right": info.right,
+                    "judge_all": info.judge_all,
+                    "judge_right": info.judge_right,
+                    "wrong": info.wrong,
+                    "time": info.time
+                },
+                success(res){
+                    console.log(res.result);
+                    window.location.href="/stu/testThreeResult/";
+                }
+            })
+        }
+
+        const t = setTimeout(function () {
+            checkTime()
+        }, 1000);
+    }
+
+    if (navigator.mediaDevices.getUserMedia) {
+    const constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(
+        stream => {
+            const rightBtn = document.querySelector("#right-btn");
+            let mediaRecorder = new MediaRecorder(stream);
+            var chunks = [];
+
+            const wrongBtn = document.querySelector("#wrong-btn");
+
+            wrongBtn.onclick = () => {
+
+                if(begin === false){
+                    begin = true;
+                    countTime();
+                    checkTime();
+                }
+
+                wav_name = name;
+                name = file_name();
+
+                pre_exercises = cur_exercises;
+                if(idx === exercises.length){
+                    checkTime();
+                }
+                cur_exercises = exercises[idx];
+                idx = idx + 1;
 
 
 
-    $('#wrong').click(function(){
-        const used_time = getTime();
-        let content = $('#exercise').text();
-        $.ajax({
-            url: "/stu/uploadInfo/",
-            type: "post",
-            data: {time:used_time, choice: 1, info: info, content: content},
-            dataType: "JSON",
-            success: function (res){
-                if(res.status)
-                    console.log("向后台传输答题情况成功");
-                    console.log(this.data);
-                    console.log(res);
-                    changeExercise(res.exercise)
+                $('#exercise').text(cur_exercises["content"]);
+                name = name + cur_exercises["content"];
+
+                if (recording === false) {
+                    recording = true;
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+
+                        {#const element = document.createElement("a");#}
+                        {#element.setAttribute("href", audioURL);#}
+                        {#element.setAttribute("download", wav_name);#}
+                        {#element.click();#}
+
+                        var fd = new FormData();
+                        fd.append('wav_name', wav_name);
+                        fd.append('file', blob);
+                        console.log(blob);
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            var jsonObject;
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                jsonObject = JSON.parse(xhr.responseText);
+                                //处理返回结果
+
+                            }
+                        };
+                        xhr.open('POST', '/speech/save/');
+                        xhr.send(fd);
+
+
+
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+                    info.time = getSeconds();
+                    console.log(wav_name);
+                    let flag = false;
+                    if(pre_exercises["correct"] === false)
+                        flag = true;
+                    $.ajax({
+                        url: '/stu/recognition/2/',
+                        type: 'post',
+                        data: {
+                            "file_name": wav_name,
+                            "character": pre_exercises["content"],
+                            "judge": flag
+                        },
+                        success: function(res){
+                            console.log("识别目标: " + pre_exercises["content"]);
+                            console.log(res);
+                            info.total += res["len"];
+                            info.right += res["cnt"];
+                            info.judge_all += 1;
+                            info.wrong += res["wrong"];
+                            if(pre_exercises["correct"] === false)
+                                info.judge_right += 1;
+                            console.log(info);
+                    },
+                        error : function(){
+                            console.log("error");
+                        }
+                    })
+                    }
+
+                }
             }
-        })
-    })
-    }
 
-{#修改题目#}
-    function changeExercise(new_exercise){
-        console.log("更新题目");
-        $('#exercise').text(new_exercise);
-    }
+            rightBtn.onclick = () => {
+
+                if(begin === false){
+                    begin = true;
+                    countTime();
+                    checkTime();
+                }
+
+                wav_name = name;
+                name = file_name();
+
+                pre_exercises = cur_exercises;
+
+                cur_exercises = exercises[idx];
+                idx = idx + 1;
+
+                $('#exercise').text(cur_exercises["content"]);
+                name = name + cur_exercises["content"];
+
+                if (recording === false) {
+                    recording = true;
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+
+                        {#const element = document.createElement("a");#}
+                        {#element.setAttribute("href", audioURL);#}
+                        {#element.setAttribute("download", wav_name);#}
+                        {#element.click();#}
+
+                        var fd = new FormData();
+                        fd.append('wav_name', wav_name);
+                        fd.append('file', blob);
+                        console.log(blob);
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            var jsonObject;
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                jsonObject = JSON.parse(xhr.responseText);
+                                //处理返回结果
+
+                            }
+                        };
+                        xhr.open('POST', '/speech/save/');
+                        xhr.send(fd);
+
+
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+                    info.time = getSeconds();
+                    console.log(wav_name);
+                    let flag = false;
+                    if(pre_exercises["correct"] === true){
+                        flag = true;
+                    }
+                    $.ajax({
+                        url: '/stu/recognition/2/',
+                        type: 'post',
+                        data: {
+                            "file_name": wav_name,
+                            "character": pre_exercises["content"],
+                            "judge": flag
+                        },
+                        success: function(res){
+                            console.log("识别目标: " + pre_exercises["content"]);
+                            console.log(res);
+                            info.total += res["len"];
+                            info.right += res["cnt"];
+                            info.judge_all += 1;
+                            info.wrong += res["wrong"];
+                            if(pre_exercises["correct"] === true)
+                                info.judge_right += 1;
+                            console.log(info);
+                    },
+                        error : function(){
+                            console.log("error");
+                        }
+                    })
+                    }
+
+                }
+            }
+        }
+    )}
 
     </script>
 {% endblock %}
