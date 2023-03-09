@@ -4,9 +4,6 @@ Created on Sat Nov 19 17:07:23 2022
 
 @author: lenovo
 """
-import pyaudio
-import wave
-import time
 from aip import AipSpeech
 from ffmpy import FFmpeg
 import os
@@ -45,39 +42,39 @@ class Voice:
         ff.run()
         return result
 
-    def record(self, file, seconds):
-        p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16, channels=self.n_channels, rate=self.frame_rate, input=True,
-                        frames_per_buffer=self.num_samples)
-        buf = []
-        t = time.time()
-        while time.time() < t + seconds:
-            data = stream.read(self.num_samples)
-            buf.append(data)
-        wf = wave.open(file, 'wb')
-        wf.setnchannels(self.n_channels)
-        # wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-        wf.setsampwidth(self.samp_width)
-        wf.setframerate(self.frame_rate)
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-        wf.writeframes(b''.join(buf))
-        wf.close()
+    # def record(self, file, seconds):
+    #     p = pyaudio.PyAudio()
+    #     stream = p.open(format=pyaudio.paInt16, channels=self.n_channels, rate=self.frame_rate, input=True,
+    #                     frames_per_buffer=self.num_samples)
+    #     buf = []
+    #     t = time.time()
+    #     while time.time() < t + seconds:
+    #         data = stream.read(self.num_samples)
+    #         buf.append(data)
+    #     wf = wave.open(file, 'wb')
+    #     wf.setnchannels(self.n_channels)
+    #     # wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+    #     wf.setsampwidth(self.samp_width)
+    #     wf.setframerate(self.frame_rate)
+    #     stream.stop_stream()
+    #     stream.close()
+    #     p.terminate()
+    #     wf.writeframes(b''.join(buf))
+    #     wf.close()
 
-    def play(self, file):
-        p = pyaudio.PyAudio()
-        wf = wave.open(file, 'rb')
-        stream = p.open(format=p.get_format_from_width(wf.getsampwidth()), channels=wf.getnchannels(),
-                        rate=wf.getframerate(), output=True)
-        data = wf.readframes(self.num_samples)
-        while len(data) > 0:
-            stream.write(data)
-            data = wf.readframes(self.num_samples)
-        stream.stop_stream()
-        stream.close()
-        p.terminate()
-        wf.close()
+    # def play(self, file):
+    #     p = pyaudio.PyAudio()
+    #     wf = wave.open(file, 'rb')
+    #     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()), channels=wf.getnchannels(),
+    #                     rate=wf.getframerate(), output=True)
+    #     data = wf.readframes(self.num_samples)
+    #     while len(data) > 0:
+    #         stream.write(data)
+    #         data = wf.readframes(self.num_samples)
+    #     stream.stop_stream()
+    #     stream.close()
+    #     p.terminate()
+    #     wf.close()
 
 
 voice = Voice()
