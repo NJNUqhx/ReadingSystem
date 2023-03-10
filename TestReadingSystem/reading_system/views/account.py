@@ -22,7 +22,7 @@ def tec_login(request):
     if form.is_valid():
         tec_object = models.TecInfo.objects.filter(**form.cleaned_data).first()
         if not tec_object:
-            form.add_error("password", "用户名或密码错误")
+            form.add_error("tec_password", "用户名或密码错误")
             return render(request, 'tec_login.html', {'form': form})
         request.session["info"] = {"account": tec_object.tec_account, "password": tec_object.tec_password}
         return redirect("/tec/stulist/")

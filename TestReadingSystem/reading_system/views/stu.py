@@ -279,7 +279,7 @@ def get_exercise_list(request, nid=0):
         list = models.Exercise.objects.all()
         exercise_list = []
         for exercise in list:
-            if len(exercise_list) > 40:
+            if len(exercise_list) > 60:
                 break
             elem = {"content": exercise.content, "correct": exercise.answer}
             exercise_list.append(elem)

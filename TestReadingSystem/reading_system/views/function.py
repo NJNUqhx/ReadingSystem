@@ -152,29 +152,25 @@ def download_excel(request, nid=0):
         ws['B1'] = '学生姓名'
         ws['C1'] = '年级'
         ws['D1'] = '总字数'
-        ws['E1'] = '错误数'
-        ws['F1'] = '分数'
-        ws['G1'] = '测试用时'
-        ws['H1'] = '正确率'
-        ws['I1'] = '平均阅读速度'
-        ws['J1'] = '错误汉字'
-        ws['K1'] = '测试时间'
+        ws['E1'] = '分数'
+        ws['F1'] = '识字量'
+        ws['G1'] = '正确率'
+        ws['H1'] = '错误汉字'
+        ws['I1'] = '测试时间'
 
         name = request.POST.get('name')
 
-        exercise_list = models.ExerciseV2Result.objects.filter(name=name)
+        exercise_list = models.ExerciseV1Result.objects.filter(name=name)
         for i in range(0, len(exercise_list)):
             ws.cell(i + 2, 1).value = exercise_list[i].stu_account
             ws.cell(i + 2, 2).value = exercise_list[i].name
             ws.cell(i + 2, 3).value = exercise_list[i].grade
             ws.cell(i + 2, 4).value = exercise_list[i].total_characters
-            ws.cell(i + 2, 5).value = exercise_list[i].wrong_characters
-            ws.cell(i + 2, 6).value = exercise_list[i].score
-            ws.cell(i + 2, 7).value = exercise_list[i].test_time
-            ws.cell(i + 2, 8).value = exercise_list[i].accuracy_rate
-            ws.cell(i + 2, 9).value = exercise_list[i].avg_speed
-            ws.cell(i + 2, 10).value = exercise_list[i].wrong
-            ws.cell(i + 2, 11).value = exercise_list[i].exercise_time.__str__()
+            ws.cell(i + 2, 5).value = exercise_list[i].score
+            ws.cell(i + 2, 6).value = exercise_list[i].literacy
+            ws.cell(i + 2, 7).value = exercise_list[i].accuracy_rate
+            ws.cell(i + 2, 8).value = exercise_list[i].wrong
+            ws.cell(i + 2, 9).value = exercise_list[i].exercise_time.__str__()
     elif nid == 6:
         ws['A1'] = '学生账号'
         ws['B1'] = '学生姓名'

@@ -6,7 +6,7 @@
 <div class="container">
     <div class="jumbotron area" >
         <div id="exercise-area">
-            <label id="exercise">字</label>
+            <label id="exercise">点击右下角按键开始</label>
         </div>
         <div class="answer-area">
             <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
@@ -50,6 +50,9 @@
     $(function(){
       getExerciseList();
     })
+
+    const time_limit = 60;
+
     let isStart = true;
     let start = new Date();
     let begin = false;
@@ -131,7 +134,7 @@
     let wrong = "";
 
     function checkTime(){
-        if(idx === exercises.length || getSeconds() > 180){
+        if(idx === exercises.length || getSeconds() > time_limit){
             $.ajax({
                 url: "/stu/uploadInfo/2/",
                 type: "post",

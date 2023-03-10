@@ -24,6 +24,7 @@
         text-align: center;
         margin-left: 45%;
         vertical-align: middle;
+        padding-bottom: 0px;
     }
     #next_exercise{
         float: right;
@@ -49,8 +50,11 @@
     let start = new Date();
     let begin = false;
 
-    let info = {total: 0, wrong: 0}
-    let wrong_limit = 5;
+    let info = {total: 0, wrong: 0};
+
+    {#修改错误上限#}
+    let wrong_limit = 8;
+
     let score = 0;
     let literacy = 0.0;
 
