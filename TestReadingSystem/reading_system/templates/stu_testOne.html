@@ -5,7 +5,7 @@
 
 <div class="container">
     <div class="jumbotron area" >
-        <div id="exercise-area">
+        <div class="exercise-area">
             <label id="exercise">字</label>
         </div>
         <div class="answer-area">
@@ -19,12 +19,17 @@
 
 {% block css %}
 <style>
+    *{
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
     label{
-        font-size: 150px;
+        font-size: 250px;
         text-align: center;
-        margin-left: 45%;
+        margin-left: 40%;
         vertical-align: middle;
-        padding-bottom: 0px;
+        padding-bottom: 0;
     }
     #next_exercise{
         float: right;
@@ -33,10 +38,10 @@
         height: 720px;
     }
     .answer-area{
-        margin-top: 380px;
+        margin-top: 200px;
     }
     .exercise-area{
-        text-align: center;
+
     }
 </style>
 {% endblock %}

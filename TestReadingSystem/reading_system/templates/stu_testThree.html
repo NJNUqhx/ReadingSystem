@@ -5,7 +5,7 @@
 
 <div class="container">
     <div class="jumbotron area" >
-        <div id="exercise-area">
+        <div class="exercise-area">
             <label id="exercise">点击右下角按键开始</label>
         </div>
         <div class="answer-area">
@@ -21,9 +21,11 @@
 {% block css %}
 <style>
     label{
-        font-size: 100px;
-        text-align: center;
+        font-size: 72px;
+
         vertical-align: middle;
+        height: 300px;
+        margin-top: 10%;
     }
     #right-btn{
         float: right;
@@ -37,10 +39,11 @@
         height: 720px;
     }
     .answer-area{
-        margin-top: 380px;
+
     }
     .exercise-area{
         text-align: center;
+        margin-bottom: 10%;
     }
 </style>
 {% endblock %}
