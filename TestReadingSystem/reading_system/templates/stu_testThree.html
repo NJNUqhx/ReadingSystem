@@ -54,7 +54,7 @@
       getExerciseList();
     })
 
-    const time_limit = 60;
+    const time_limit = 180;
 
     let isStart = true;
     let start = new Date();
@@ -206,11 +206,6 @@
                         var blob = new Blob(chunks, {type: "audio/mpeg;"});
                         chunks = [];
                         var audioURL = window.URL.createObjectURL(blob);
-
-                        {#const element = document.createElement("a");#}
-                        {#element.setAttribute("href", audioURL);#}
-                        {#element.setAttribute("download", wav_name);#}
-                        {#element.click();#}
 
                         var fd = new FormData();
                         fd.append('wav_name', wav_name);

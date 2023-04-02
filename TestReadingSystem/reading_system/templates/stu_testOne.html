@@ -58,7 +58,7 @@
     let info = {total: 0, wrong: 0};
 
     {#修改错误上限#}
-    let wrong_limit = 8;
+    let wrong_limit = 15;
 
     let score = 0;
     let literacy = 0.0;
@@ -86,7 +86,7 @@
 
     {#到达截止时间后跳转#}
     function checkTime(){
-        if(info.wrong === wrong_limit) {
+        if(info.wrong >= wrong_limit || info.total >= 100) {
            // 上传测试成绩
             score = info.total - info.wrong;
             for(let i = 1; i <= 10; i++){
@@ -162,11 +162,13 @@
             type: "post",
             success: function (resp){
                 exercises = resp.list;
+                console.log(resp.list);
             },
             error:function(){
                 console.log("error");
             }
         })
+
     }
 
     let recording = false;
@@ -219,11 +221,6 @@
                         chunks = [];
                         var audioURL = window.URL.createObjectURL(blob);
 
-                        {#const element = document.createElement("a");#}
-                        {#element.setAttribute("href", audioURL);#}
-                        {#element.setAttribute("download", wav_name);#}
-                        {#element.click();#}
-
                         var fd = new FormData();
                         fd.append('wav_name', wav_name);
                         fd.append('file', blob);
@@ -257,9 +254,6 @@
                             console.log(wrong_characters);
 
                             all_characters = all_characters + pre_exercise['ch'];
-
-                            console.log(res);
-
                             if(res.result !== "error")
                             {
                                 info.total++;
@@ -268,14 +262,24 @@
                                     info.wrong++;
                                     wrong_characters = wrong_characters + pre_exercise['ch'];
                                 }
-
                                 else {
                                     right_level[pre_exercise['level']]++;
                                     recognized_characters = recognized_characters + pre_exercise['ch'];
                                 }
-                            }else{
+                            }
+                            else
+                            {
+                                info.total++;
+                                total_level[pre_exercise['level']]++;
+                                info.wrong++;
+                                wrong_characters = wrong_characters + pre_exercise['ch'];
                                 not_recognized_characters = not_recognized_characters + pre_exercise['ch'];
                             }
+
+                            console.log(pre_exercise);
+                            console.log(res);
+                            console.log(wrong_characters);
+                            console.log(not_recognized_characters);
                     }
                     })
                     }

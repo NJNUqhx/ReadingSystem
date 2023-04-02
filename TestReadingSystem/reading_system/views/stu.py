@@ -290,8 +290,6 @@ from datetime import datetime
 from reading_system.utils.character import check
 @csrf_exempt
 def stu_saveSpeech(request):
-    # print(type(request.FILES['file']))
-    print("读取文件中-------------------")
     file = request.FILES.get('file')
     wav_name = request.POST.get('wav_name')
 
@@ -313,7 +311,14 @@ def stu_recognizeSpeech(request, nid=0):
     voice.mp3towav(mp3_path, 'reading_system/static/wav/');
     res = voice.recognize(recognize_path);
     res = check(res)
-    print(res)
+
+    # 识别测试音频
+    if nid == 3:
+        if isinstance(res, str):
+            return JsonResponse({"result": res, "success":True})
+        else:
+            return JsonResponse({"success":False})
+
     # 存储识别结果
     wav_result = WavRecognitionResult(stu=dic['name'])
     wav_result.path = recognize_path
@@ -362,7 +367,7 @@ def stu_recognizeSpeech(request, nid=0):
 
             return JsonResponse({"result": res, "right": flag})
         else:
-            return JsonResponse({"result": "未识别出来", "right": False})
+            return JsonResponse({"result": "error", "right": False})
     elif nid == 1:
         if not isinstance(res, str):
             return JsonResponse({"result": "error"})

@@ -5,28 +5,14 @@
     <div class="container">
         <div class="jumbotron" >
             <h1 style="text-align: center">阅读流畅性测试一</h1>
-            <h3 style="text-align: left;margin-top: 10%;line-height: 2em;">&emsp;&emsp;现在我要请你读一些字。请你从左到右，一行一行的读，遇到不认识的字就说“跳”，然后继续读下一个字。所有认识的字都要大声读出来。记住，你要读的又快又准，只给你一分钟时间。</h3>
-            <a type="button" class="btn btn-success btn-lg" href="#" style="margin-top: 25%;margin-left: 40%;">点击开始测试</a>
+            <h3 style="text-align: left;margin-top: 10%;line-height: 2em;">&emsp;&emsp;<b>测试要求</b>：出声朗读屏幕上的词语，读完后，点击<b>下一题</b>按钮；如果不会读，也点击<b>下一题</b>按钮。准备好后，点击下方按钮进入测试。只给1分钟时间。</h3>
+            <a type="button" class="btn btn-success btn-lg" href="/stu/testTwo/" style="margin-top: 25%;margin-left: 40%;">点击开始测试</a>
         </div>
-        <audio id="player">
-          <source src="{% static 'music/song.mp3' %}" type="audio/mpeg">
-        </audio>
     </div>
 
 {% endblock %}
 
 {% block js %}
 <script>
-    $(function () {
-        playMusic();
-    })
-    function playMusic() {
-        var player = $("#player")[0];
-        if(player.paused)
-            player.play();
-        else
-            player.pause();
-        console.log("播放音乐")
-    }
 </script>
 {% endblock %}

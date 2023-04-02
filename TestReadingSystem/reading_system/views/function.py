@@ -254,3 +254,6 @@ def upload_excel(request):
     response = HttpResponse(output.getvalue(), content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=result.xls'
     return response
+
+def test_voice(request):
+    return render(request, "test_voice.html")

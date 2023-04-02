@@ -80,5 +80,8 @@ urlpatterns = [
 
     path('test/upload/', function.test_upload),
 
-    path('download/<int:nid>/', function.download_excel)
+    path('download/<int:nid>/', function.download_excel),
+
+    # 模拟测试
+    path('test/voice/', function.test_voice)
 ]

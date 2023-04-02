@@ -1,0 +1,116 @@
+{% extends 'layout_stu.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="jumbotron">
+          <h1>设备音频测试</h1>
+          <h2 id="state">录制状态: 未录制</h2>
+          <h2 id="result">识别结果:</h2>
+            <div style="text-align: center;">
+                <button class="btn btn-primary btn-lg" role="button" id="record">开始录制</button>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+{% block css %}
+    <style>
+    h1{
+        text-align: center;
+        margin-bottom: 5%;
+    }
+    h2{
+        text-align: center;
+    }
+    #record{
+        margin-top: 5%;
+        text-align: center;
+    }
+    #result{
+        color: red;
+    }
+    </style>
+{% endblock %}
+{% block js %}
+    <script>
+
+    function GetWavName()
+    {
+        let cur_time = new Date();
+        return cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
+            + cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+    }
+
+    let recording = false;
+    if (navigator.mediaDevices.getUserMedia) {
+    const constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(
+        stream => {
+            const recordBtn = document.querySelector("#record");
+            const mediaRecorder = new MediaRecorder(stream);
+            var chunks = [];
+            recordBtn.onclick = () => {
+                if (recording === false) {
+                    recording = true;
+
+                    $("#state").text("录制状态: 录制中...");
+                    $("#record").text("结束录制");
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+                } else {
+
+                    recording = false;
+                    $("#state").text("录制状态: 录制结束,正在识别...");
+                    $("#record").text("开始录制");
+                    wav_name = GetWavName();
+
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+
+                        var fd = new FormData();
+                        fd.append('wav_name', wav_name);
+                        fd.append('file', blob);
+                        console.log(blob);
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            var jsonObject;
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                jsonObject = JSON.parse(xhr.responseText);
+                                //处理返回结果
+
+                            }
+                        };
+                        xhr.open('POST', '/speech/save/');
+                        xhr.send(fd);
+
+                    $.ajax({
+                        url: '/stu/recognition/3/',
+                        type: 'post',
+                        data: {
+                            file_name: wav_name,
+                        },
+                        success: function(res){
+                            if(res.success === true){
+                                $("#result").text("识别成功: " + res.result);
+                                console.log("识别结果: " + res.result);
+                            }else{
+                                $("#result").text("识别失败");
+                            }
+                        }
+                    })
+                    }
+                }
+
+
+            }
+        }
+    )}
+    </script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12px" height="12px" viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>切片</title>
+    <defs>
+        <filter id="filter-1">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0.333333 0 0 0 0 0.337255 0 0 0 0 0.400000 0 0 0 1.000000 0"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="文库首页V2.0-规划" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="开发者文库-头部信息优化和交互" transform="translate(-789.000000, -2980.000000)">
+            <g id="编组-5备份-5" transform="translate(269.000000, 2960.000000)">
+                <g id="编组-4" transform="translate(163.000000, 0.000000)">
+                    <g id="ic_ask-/-投票加" transform="translate(154.000000, 14.000000)" filter="url(#filter-1)">
+                        <g transform="translate(209.000000, 12.000000) rotate(-270.000000) translate(-209.000000, -12.000000) translate(203.000000, 6.000000)">
+                            <path d="M6.8454889,1.83869076 L11.0311623,8.46600701 C11.3260785,8.93295764 11.186617,9.55057272 10.7196664,9.8454889 C10.5598493,9.94642606 10.3746968,10 10.1856734,10 L1.81432658,10 C1.26204183,10 0.814326582,9.55228475 0.814326582,9 C0.814326582,8.81097663 0.867900527,8.62582417 0.968837679,8.46600701 L5.1545111,1.83869076 C5.44942728,1.37174014 6.06704236,1.23227867 6.53399299,1.52719485 C6.65968855,1.60658152 6.76610223,1.7129952 6.8454889,1.83869076 Z" id="矩形" fill="#FC5533"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
