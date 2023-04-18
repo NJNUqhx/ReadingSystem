@@ -53,6 +53,8 @@ urlpatterns = [
     path('character/list/', exercise.character_list),
     path('exercise/<int:nid>/list/', exercise.exercise_list),
     path('character/<int:nid>/list/', exercise.character_list),
+    path('phrase/list/', exercise.phrase_list),
+    path('phrase/<int:nid>/list/', exercise.phrase_list),
 
     path('tec/testlist/one/', exercise.exercise_testOneList),
     path('tec/testlist/two/', exercise.exercise_testTwoList),
@@ -83,5 +85,6 @@ urlpatterns = [
     path('download/<int:nid>/', function.download_excel),
 
     # 模拟测试
-    path('test/voice/', function.test_voice)
+    path('test/voice/', function.test_voice),
+
 ]

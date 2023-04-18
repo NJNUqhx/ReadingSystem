@@ -1,21 +1,9 @@
-import datetime
-import json
-import random
-
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 
 from reading_system import models
-from reading_system.utils.pagination import Pagination
-from reading_system.utils.chooseList import gen
-from reading_system.utils.Voice import voice
-from reading_system.models import ExerciseV1Result
-from reading_system.models import ExerciseV2Result
-from reading_system.models import ExerciseV3Result
-from reading_system.models import Character
-from reading_system.models import WavRecognitionResult
+
 
 from io import BytesIO
 import openpyxl
@@ -171,6 +159,35 @@ def download_excel(request, nid=0):
             ws.cell(i + 2, 7).value = exercise_list[i].accuracy_rate
             ws.cell(i + 2, 8).value = exercise_list[i].wrong
             ws.cell(i + 2, 9).value = exercise_list[i].exercise_time.__str__()
+    elif nid == 7:
+        # 某学生的流畅性测试一
+        ws['A1'] = '学生账号'
+        ws['B1'] = '学生姓名'
+        ws['C1'] = '年级'
+        ws['D1'] = '总字数'
+        ws['E1'] = '错误数'
+        ws['F1'] = '分数'
+        ws['G1'] = '测试用时'
+        ws['H1'] = '正确率'
+        ws['I1'] = '平均阅读速度'
+        ws['J1'] = '错误汉字'
+        ws['K1'] = '测试时间'
+
+        name = request.POST.get('name')
+        exercise_list = models.ExerciseV2Result.objects.filter(name=name)
+
+        for i in range(0, len(exercise_list)):
+            ws.cell(i + 2, 1).value = exercise_list[i].stu_account
+            ws.cell(i + 2, 2).value = exercise_list[i].name
+            ws.cell(i + 2, 3).value = exercise_list[i].grade
+            ws.cell(i + 2, 4).value = exercise_list[i].total_characters
+            ws.cell(i + 2, 5).value = exercise_list[i].wrong_characters
+            ws.cell(i + 2, 6).value = exercise_list[i].score
+            ws.cell(i + 2, 7).value = exercise_list[i].test_time
+            ws.cell(i + 2, 8).value = exercise_list[i].accuracy_rate
+            ws.cell(i + 2, 9).value = exercise_list[i].avg_speed
+            ws.cell(i + 2, 10).value = exercise_list[i].wrong
+            ws.cell(i + 2, 11).value = exercise_list[i].exercise_time.__str__()
     elif nid == 6:
         ws['A1'] = '学生账号'
         ws['B1'] = '学生姓名'
@@ -205,6 +222,24 @@ def download_excel(request, nid=0):
             ws.cell(i + 2, 12).value = exercise_list[i].judge_accuracy
             ws.cell(i + 2, 13).value = exercise_list[i].wrong
             ws.cell(i + 2, 14).value = exercise_list[i].exercise_time.__str__()
+    elif nid == 8:
+        # 所有年级或者某个年级的词语统计结果
+        ws['A1'] = '词语'
+        ws['B1'] = '出现总次数'
+        ws['C1'] = '正确次数'
+        ws['D1'] = '正确率'
+        grade = int(request.POST.get('grade'))
+
+        if grade == 0:
+            exercise_list = models.Phrase.objects.all()
+        else:
+            exercise_list = models.PhraseOfGrade.objects.filter(grade=grade)
+        for i in range(0, len(exercise_list)):
+            ws.cell(i + 2, 1).value = exercise_list[i].content
+            ws.cell(i + 2, 2).value = exercise_list[i].total
+            ws.cell(i + 2, 3).value = exercise_list[i].right
+            ws.cell(i + 2, 4).value = exercise_list[i].accuracy
+
 
     # 准备写入到IO中
     output = BytesIO()

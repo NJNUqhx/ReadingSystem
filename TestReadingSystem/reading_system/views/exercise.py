@@ -34,29 +34,48 @@ def exercise_list(request, nid=0):
     return render(request, "exercise_list.html", context)
 
 
-def character_list(request, nid=0, grade=0):
+# 词语题库处理
+def phrase_list(request, nid=0):
+    data_dict = {}
+    search_data = request.GET.get('q', "")
+    grade = request.GET.get('grade', 0)
+    if search_data:
+        data_dict["content__contains"] = search_data
+
+    queryset = models.Phrase.objects.filter(**data_dict)
+
+    if nid == 1:
+        queryset = models.Phrase.objects.filter(**data_dict).order_by("accuracy")
+    elif nid == 2:
+        queryset = models.Phrase.objects.filter(**data_dict).order_by("-accuracy")
+
+    page_object = Pagination(request, queryset)
+
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "search_data": search_data,
+        "page_string": page_string,
+        "grade": grade
+    }
+    return render(request, "phrase_list.html", context)
+
+
+def character_list(request, nid=0):
     data_dict = {}
     search_data = request.GET.get('q', "")
     grade = request.GET.get('grade', 0)
     if search_data:
         data_dict["character__contains"] = search_data
 
-    if grade == 0:
-        queryset = models.Character.objects.filter(**data_dict)
+    queryset = models.Character.objects.filter(**data_dict)
 
-        if nid == 1:
-            queryset = models.Character.objects.filter(**data_dict).order_by("accuracy")
-        elif nid == 2:
-            queryset = models.Character.objects.filter(**data_dict).order_by("-accuracy")
-        page_object = Pagination(request, queryset)
-    else:
-        data_dict["grade"] = grade
-        queryset = models.CharacterOfGrade.objects.filter(**data_dict)
-        if nid == 1:
-            queryset = models.CharacterOfGrade.objects.filter(**data_dict).order_by("accuracy")
-        elif nid == 2:
-            queryset = models.CharacterOfGrade.objects.filter(**data_dict).order_by("-accuracy")
-        page_object = Pagination(request, queryset)
+    if nid == 1:
+        queryset = models.Character.objects.filter(**data_dict).order_by("accuracy")
+    elif nid == 2:
+        queryset = models.Character.objects.filter(**data_dict).order_by("-accuracy")
+    page_object = Pagination(request, queryset)
 
     page_queryset = page_object.query_set
     page_string = page_object.html()

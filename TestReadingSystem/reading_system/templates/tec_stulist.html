@@ -58,7 +58,9 @@
                             <button class="btn btn-info  btn-xs " id="download1"
                             onclick="downloadCorrect('{{ obj.name }}')">准确性测试</button>
                             <button class="btn btn-success  btn-xs " id="download2"
-                            onclick="downloadFluent('{{ obj.name }}')">流畅性测试</button>
+                            onclick="downloadFluentOne('{{ obj.name }}')">流畅性测试一</button>
+                            <button class="btn btn-warning  btn-xs " id="download3"
+                            onclick="downloadFluentTwo('{{ obj.name }}')">流畅性测试二</button>
                         </td>
                       </tr>
                     {% endfor %}
@@ -100,9 +102,29 @@ function downloadCorrect(name){
     }
 }
 
-function downloadFluent(name){
+function downloadFluentOne(name){
+    console.log("阅读流畅性二" + name);
 
-    console.log("阅读流畅性" + name);
+    const req = new XMLHttpRequest();
+    req.open('POST', '/download/7/', true);
+    req.responseType = 'blob';
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); //设置请求头
+    const body = "name="+name
+    req.send(body); //输入参数
+    req.onload = function() {
+         const data = req.response;
+         const a = document.createElement('a');
+         const blob = new Blob([data]);
+         const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
+         a.href = blobUrl;
+         a.download = '阅读流畅性测试一' + name +'.xls'; //下载后文件名
+         a.click();
+    }
+}
+
+function downloadFluentTwo(name){
+
+    console.log("阅读流畅性二" + name);
 
     const req = new XMLHttpRequest();
     req.open('POST', '/download/6/', true);
@@ -116,7 +138,7 @@ function downloadFluent(name){
          const blob = new Blob([data]);
          const blobUrl = window.URL.createObjectURL(blob); //创建下载的链接
          a.href = blobUrl;
-         a.download = '阅读流畅性测试' + name +'.xls'; //下载后文件名
+         a.download = '阅读流畅性测试二' + name +'.xls'; //下载后文件名
          a.click();
     }
 

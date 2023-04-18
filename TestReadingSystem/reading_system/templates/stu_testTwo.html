@@ -6,7 +6,7 @@
 <div class="container">
     <div class="jumbotron area" >
         <div id="exercise-area">
-            <label id="exercise">点击右下角按键开始</label>
+            <label id="exercise">词语</label>
         </div>
         <div class="answer-area">
             <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
@@ -19,10 +19,18 @@
 
 {% block css %}
 <style>
+     *{
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
     label{
-        font-size: 100px;
+        margin-top: 10%;
+        font-size: 180px;
         text-align: center;
+        margin-left: 30%;
         vertical-align: middle;
+        padding-bottom: 0;
     }
     #next_exercise{
         float: right;
@@ -31,10 +39,7 @@
         height: 720px;
     }
     .answer-area{
-        margin-top: 380px;
-    }
-    .exercise-area{
-        text-align: center;
+        margin-top: 200px;
     }
 </style>
 {% endblock %}
@@ -103,14 +108,16 @@
 
     let exercises = [];
     let idx = 0;
-    let pre_exercises = "";
-    let cur_exercises = "";
+    let pre_exercise = {"phrase": "词语", len: 2};
+    let cur_exercise = {"phrase": "词语", len: 2};
     function getExerciseList(){
         $.ajax({
-            url: "/stu/exercise/list/1/",
+            {#url: "/stu/exercise/list/1/",#}
+            url: "/stu/exercise/list/3/",
             type: "post",
             success: function (resp){
                 exercises = resp.list;
+                console.log(exercises);
             },
             error:function(){
                 {#console.log("error");#}
@@ -124,8 +131,10 @@
 
     function checkTime(){
         let time = getTime();
-
-        if(group > 12 || getSeconds() > 60) {
+        {# 之前判断结束的标志 #}
+        let flag = group > 12 || getSeconds() > 60;
+        let new_flag = getSeconds() > 60 || idx >= exercises.length - 1;
+        if(new_flag) {
             $.ajax({
                 url: "/stu/uploadInfo/1/",
                 type: "post",
@@ -136,11 +145,9 @@
                     "time": info.time
                 },
                 success(res){
-                    {#console.log(res.result);#}
                     window.location.href="/stu/testTwoResult/";
                 },
                 error(){
-                    {#console.log("error");#}
                 }
             })
 
@@ -170,14 +177,22 @@
                 wav_name = name;
                 name = file_name();
 
-                pre_exercises = cur_exercises;
-                cur_exercises = "";
-                for (let i = group * 8; i < group * 8 + 8; i++) {
-                    cur_exercises = cur_exercises.concat(exercises[i]);
+                {# 更新题目 #}
+                {#pre_exercise = cur_exercise;#}
+                {#cur_exercise = "";#}
+                {#for (let i = group * 8; i < group * 8 + 8; i++) {#}
+                {#    cur_exercise = cur_exercise.concat(exercises[i]);#}
+                {#group = group + 1;#}
+                
+                pre_exercise = cur_exercise;
+                cur_exercise = exercises[idx];
+                idx ++;
+                if(idx === exercises.length){
+                    checkTime();
                 }
-                group = group + 1;
-                $('#exercise').text(cur_exercises);
-                name = name + cur_exercises;
+                
+                $('#exercise').text(cur_exercise["phrase"]);
+                name = name + cur_exercise["phrase"];
 
                 if (recording === false) {
                     recording = true;
@@ -191,11 +206,6 @@
                         var blob = new Blob(chunks, {type: "audio/mpeg;"});
                         chunks = [];
                         var audioURL = window.URL.createObjectURL(blob);
-
-                        {#const element = document.createElement("a");#}
-                        {#element.setAttribute("href", audioURL);#}
-                        {#element.setAttribute("download", wav_name);#}
-                        {#element.click();#}
 
                         var fd = new FormData();
                         fd.append('wav_name', wav_name);
@@ -218,24 +228,29 @@
                             chunks.push(e.data);
                         };
                     info.time = getSeconds();
-                    {#console.log(wav_name);#}
+
                     $.ajax({
-                        url: '/stu/recognition/1/',
+                        url: '/stu/recognition/4/',
                         type: 'post',
                         data: {
                             file_name: wav_name,
-                            character: pre_exercises
+                            character: pre_exercise["phrase"]
                         },
                         success: function(res){
-                            {#console.log("识别目标: " + pre_exercises);#}
-                            {#console.log(res);#}
-                            info.total += 8;
-                            info.right += res.cnt;
-                            info.wrong += res.wrong;
-                            {#console.log(info);#}
+                            if(res.result !== "error")
+                            {
+                                info.total += pre_exercise["len"];
+                                info.right += res.cnt;
+                                info.wrong += res.wrong;
+                                console.log(res);
+                                console.log(info);
+                            }else{
+                                alert("音频识别错误");
+                            }
+
                     },
                         error : function(){
-                            {#console.log("error");#}
+
                         }
                     })
                     }

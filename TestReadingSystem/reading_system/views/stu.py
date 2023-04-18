@@ -18,6 +18,9 @@ from reading_system.models import Character
 from reading_system.models import WavRecognitionResult
 from reading_system.models import CharacterOfGrade
 from reading_system.models import ExerciseOfGrade
+from reading_system.utils.phrase import phrase
+from reading_system.models import Phrase
+from reading_system.models import PhraseOfGrade
 
 def stu_home(request):
     info = request.session.get("info")
@@ -141,10 +144,10 @@ def stu_testThreeIntroduction(request):
 @csrf_exempt
 def stu_uploadInfo(request, nid=0):
     dic = request.session.get('info')
-    grade = dic["grade"]
+    grade = int(dic["grade"])
     name = dic["name"]
     receive = request.POST
-    print(receive)
+    # print(receive)
     if nid == 0:
         result_v1 = ExerciseV1Result(stu_account=dic["account"],name=name,grade=grade)
         result_v1.literacy = receive["literacy"]
@@ -194,7 +197,7 @@ def stu_uploadInfo(request, nid=0):
 @csrf_exempt
 def stu_turnToResult(request):
     if request.method == "POST":
-        print(request.POST)
+        # print(request.POST)
         return JsonResponse({"status": True})
 
 
@@ -285,6 +288,12 @@ def get_exercise_list(request, nid=0):
             exercise_list.append(elem)
         random.shuffle(exercise_list)
         return JsonResponse({"list": exercise_list})
+    elif nid == 3:
+        # 返回词语列表，列表里每个元素是字典
+        exercise_list = phrase.getPhrasesList()
+        random.shuffle(exercise_list)
+        return JsonResponse({"list": exercise_list})
+
 
 from datetime import datetime
 from reading_system.utils.character import check
@@ -448,7 +457,83 @@ def stu_recognizeSpeech(request, nid=0):
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
         return JsonResponse({"result": res, "cnt": cnt, "wrong": wrong, "len": len(tar)})
+    elif nid == 4:
+        if not isinstance(res, str):
+            return JsonResponse({"result": "error"})
 
+        ## 统计词语中读正确的汉字
+        tar = receive["character"]
+        right = gen.compareSentenceRight(res, tar)
+        cnt = gen.compareSentence(res, tar)
+        wrong = ""
+        phrase = receive["character"]
+
+        ## 统计词语中读错的字
+        for ch in tar:
+            if not ch in right:
+                wrong += ch
+
+        ## 统计词语中每个汉字的正确率
+        for ch in tar:
+            if models.Character.objects.filter(character=ch).exists():
+                row_object = models.Character.objects.get(character=ch)
+                row_object.total_time = row_object.total_time + 1
+                if ch in right:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+            else:
+                row_object = Character(character=ch, total_time=1, accurate_time=0)
+                if ch in right:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+
+        ## 统计所有年级词语的正确率
+        if models.Phrase.objects.filter(content=phrase).exists():
+            row_object = models.Phrase.objects.get(content=phrase)
+            if cnt == len(tar):
+                row_object.right += 1
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            else:
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            row_object.save()
+        else:
+            row_object = Phrase(content=phrase, total=0, right=0)
+            if cnt == len(tar):
+                row_object.right += 1
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            else:
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            row_object.save()
+
+        ## 统计对应年级词语的正确率
+        if models.PhraseOfGrade.objects.filter(content=phrase, grade=grade).exists():
+            row_object = models.PhraseOfGrade.objects.filter(content=phrase, grade=grade).first()
+            if cnt == len(tar):
+                row_object.right += 1
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            else:
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            row_object.save()
+        else:
+            row_object = PhraseOfGrade(content=phrase, grade=grade, total=0, right=0)
+            if cnt == len(tar):
+                row_object.right += 1
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            else:
+                row_object.total += 1
+                row_object.accuracy = row_object.right / row_object.total
+            row_object.save()
+
+        return JsonResponse({"result": res, "cnt": cnt, "wrong": wrong, "len": len(tar)})
 
 def stu_showList(request, nid=1):
     dic = request.session.get('info')
