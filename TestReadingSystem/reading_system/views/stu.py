@@ -22,6 +22,8 @@ from reading_system.utils.phrase import phrase
 from reading_system.models import Phrase
 from reading_system.models import PhraseOfGrade
 
+from reading_system.utils import chinesecharacter
+
 def stu_home(request):
     info = request.session.get("info")
     if not info:
@@ -341,9 +343,9 @@ def stu_recognizeSpeech(request, nid=0):
 
     # 准确性测试
     if nid == 0:
-        if isinstance(res, str) and len(res) == 1:
+        if isinstance(res, str):
             tar = receive["character"]
-            flag = gen.compareChar(res, tar)
+            flag = chinesecharacter.CheckCharacter(tar, res)
 
             # 所有年级统计结果
             if models.Character.objects.filter(character=tar).exists():
