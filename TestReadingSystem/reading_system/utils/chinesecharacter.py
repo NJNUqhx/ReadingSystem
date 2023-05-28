@@ -2,6 +2,7 @@ from reading_system import models
 from pypinyin import pinyin, Style
 import openpyxl
 
+
 def IsSimilarChar(ch1, ch2):
     sheng_diao1 = pinyin(ch1, style=Style(0), heteronym=True)
     sheng_mu1 = pinyin(ch1, style=Style(3), heteronym=True)
@@ -30,6 +31,7 @@ def IsSimilarChar(ch1, ch2):
             flag3 = True
     return flag1 or flag2 or flag3
 
+
 def GetPinyin(ch):
     res = pinyin(ch, heteronym=True)
     return res[0]
@@ -56,11 +58,21 @@ def JudgeCharacter(ch):
     return '\u4e00' <= ch <= '\u9fff'
 
 
+def JudgePyInSentence(tar, sentence):
+    res1 = GetPinyin(tar)
+    for elem in res1:
+        for ch in sentence:
+            res2 = GetPinyin(ch)
+            if elem in res2:
+                return True
+    return False
+
+
 def CheckCharacter(tar, sentence):
     if not JudgeCharacter(sentence[0]):
         return False
     flag1 = IsSimilarChar(tar, sentence[0])
-    flag2 = tar in sentence
+    flag2 = JudgePyInSentence(tar, sentence)
     flag3 = CompareChar(tar, sentence[0])
     flag = flag3 or (flag1 and flag2)
     return flag

@@ -1,6 +1,7 @@
 from reading_system import models
 from pypinyin import pinyin, Style
 import openpyxl
+import time
 
 
 def GetPinyin(ch):
@@ -140,7 +141,8 @@ def JudgeCharacter(ch):
 #
 def TestExcel():
     # 初始化表格
-    excel_path = "reading_system/static/result/result.xlsx"
+    cur_time = time.time().__str__()
+    excel_path = "reading_system/static/result/result" + cur_time + ".xlsx"
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = 'Excel'
@@ -148,6 +150,7 @@ def TestExcel():
     ws['B1'] = '识别结果'
     ws['C1'] = '判断结果'
     ws['D1'] = '测试时间'
+    ws['E1'] = '学生账号'
     result = models.WavRecognitionResult.objects.all()
     row = 2
     for obj in result:
@@ -157,21 +160,22 @@ def TestExcel():
         ws.cell(row, 1).value = tar
         ws.cell(row, 2).value = res
 
+        substr = res[1:]
         if CompareChar(tar, res[0]):
             # 第一个字识别正确
-            substr = res[1:]
-            if tar in substr:
+            if JudgePyInSentence(tar, substr):
                 msg = "正确，识别字正确且组词正确"
             else:
                 msg = "正确，识别字正确但组词错误"
         else:
             # 第一个字识别错误
-            if tar in res and IsSimilarChar(tar, res[0]):
+            if IsSimilarChar(tar, res[0]) and JudgePyInSentence(tar, substr):
                 msg = "正确，识别字错误但在允许范围内，组词正确"
             else:
                 msg = "错误，识别字错误且组词错误"
         ws.cell(row, 3).value = msg
         ws.cell(row, 4).value = obj.exercise_time.__str__()
+        ws.cell(row, 5).value = obj.stu
         row += 1
     wb.save(excel_path)
 
@@ -180,11 +184,21 @@ def CheckCharacter(tar, sentence):
     if not JudgeCharacter(sentence[0]):
         return False
     flag1 = IsSimilarChar(tar, sentence[0])
-    flag2 = tar in sentence
-    print(flag2)
+    flag2 = JudgePyInSentence(tar, sentence)
     flag3 = CompareChar(tar, sentence[0])
     flag = flag3 or (flag1 and flag2)
     return flag
 
 
+def JudgePyInSentence(tar, sentence):
+    res1 = GetPinyin(tar)
+    for elem in res1:
+        for ch in sentence:
+            res2 = GetPinyin(ch)
+            if elem in res2:
+                return True
+    return False
+
+
 TestExcel()
+# print(JudgePyInSentence('披', '拼披萨'))
