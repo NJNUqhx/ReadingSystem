@@ -86,5 +86,6 @@ urlpatterns = [
 
     # 模拟测试
     path('test/voice/', function.test_voice),
+    path('test/correct/', stu.stu_testCorrect)
 
 ]

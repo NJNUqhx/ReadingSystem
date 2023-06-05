@@ -4,13 +4,13 @@ import openpyxl
 
 
 def IsSimilarChar(ch1, ch2):
-    sheng_diao1 = pinyin(ch1, style=Style(0), heteronym=True)
-    sheng_mu1 = pinyin(ch1, style=Style(3), heteronym=True)
-    yun_mu1 = pinyin(ch1, style=Style(5), heteronym=True)
+    sheng_diao1 = pinyin(ch1, style=Style(0), heteronym=True)[0]
+    sheng_mu1 = pinyin(ch1, style=Style(3), heteronym=True)[0]
+    yun_mu1 = pinyin(ch1, style=Style(5), heteronym=True)[0]
 
-    sheng_diao2 = pinyin(ch2, style=Style(0), heteronym=True)
-    sheng_mu2 = pinyin(ch2, style=Style(3), heteronym=True)
-    yun_mu2 = pinyin(ch2, style=Style(5), heteronym=True)
+    sheng_diao2 = pinyin(ch2, style=Style(0), heteronym=True)[0]
+    sheng_mu2 = pinyin(ch2, style=Style(3), heteronym=True)[0]
+    yun_mu2 = pinyin(ch2, style=Style(5), heteronym=True)[0]
 
     # print(sheng_diao1, sheng_mu1, yun_mu1)
     # print(sheng_diao2, sheng_mu2, yun_mu2)
@@ -68,12 +68,24 @@ def JudgePyInSentence(tar, sentence):
     return False
 
 
+def CompareChar2(tar, res):
+    pyin = ""
+    for ch in res:
+        if ch.encode('utf-8').isalpha():
+            pyin = pyin + ch
+        else:
+            break
+    pyin = pyin.lower()
+    sheng_diao = pinyin(tar, style=Style(0), heteronym=True)
+    return pyin in sheng_diao[0]
+
+
 def CheckCharacter(tar, sentence):
     if not JudgeCharacter(sentence[0]):
         return False
     flag1 = IsSimilarChar(tar, sentence[0])
     flag2 = JudgePyInSentence(tar, sentence)
-    flag3 = CompareChar(tar, sentence[0])
+    flag3 = CompareChar(tar, sentence[0]) or CompareChar2(tar, sentence)
     flag = flag3 or (flag1 and flag2)
     return flag
 

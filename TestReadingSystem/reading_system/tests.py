@@ -27,16 +27,16 @@ def CompareChar(ch1, ch2):
 
 
 def IsSimilarChar(ch1, ch2):
-    sheng_diao1 = pinyin(ch1, style=Style(0), heteronym=True)
-    sheng_mu1 = pinyin(ch1, style=Style(3), heteronym=True)
-    yun_mu1 = pinyin(ch1, style=Style(5), heteronym=True)
+    sheng_diao1 = pinyin(ch1, style=Style(0), heteronym=True)[0]
+    sheng_mu1 = pinyin(ch1, style=Style(3), heteronym=True)[0]
+    yun_mu1 = pinyin(ch1, style=Style(5), heteronym=True)[0]
 
-    sheng_diao2 = pinyin(ch2, style=Style(0), heteronym=True)
-    sheng_mu2 = pinyin(ch2, style=Style(3), heteronym=True)
-    yun_mu2 = pinyin(ch2, style=Style(5), heteronym=True)
+    sheng_diao2 = pinyin(ch2, style=Style(0), heteronym=True)[0]
+    sheng_mu2 = pinyin(ch2, style=Style(3), heteronym=True)[0]
+    yun_mu2 = pinyin(ch2, style=Style(5), heteronym=True)[0]
 
-    # print(sheng_diao1, sheng_mu1, yun_mu1)
-    # print(sheng_diao2, sheng_mu2, yun_mu2)
+    print(sheng_diao1, sheng_mu1, yun_mu1)
+    print(sheng_diao2, sheng_mu2, yun_mu2)
 
     flag1, flag2, flag3 = False, False, False
 
@@ -160,19 +160,7 @@ def TestExcel():
         ws.cell(row, 1).value = tar
         ws.cell(row, 2).value = res
 
-        substr = res[1:]
-        if CompareChar(tar, res[0]):
-            # 第一个字识别正确
-            if JudgePyInSentence(tar, substr):
-                msg = "正确，识别字正确且组词正确"
-            else:
-                msg = "正确，识别字正确但组词错误"
-        else:
-            # 第一个字识别错误
-            if IsSimilarChar(tar, res[0]) and JudgePyInSentence(tar, substr):
-                msg = "正确，识别字错误但在允许范围内，组词正确"
-            else:
-                msg = "错误，识别字错误且组词错误"
+        msg = Check(tar, res)
         ws.cell(row, 3).value = msg
         ws.cell(row, 4).value = obj.exercise_time.__str__()
         ws.cell(row, 5).value = obj.stu
@@ -185,7 +173,7 @@ def CheckCharacter(tar, sentence):
         return False
     flag1 = IsSimilarChar(tar, sentence[0])
     flag2 = JudgePyInSentence(tar, sentence)
-    flag3 = CompareChar(tar, sentence[0])
+    flag3 = CompareChar(tar, sentence[0]) or CompareChar2(tar, sentence)
     flag = flag3 or (flag1 and flag2)
     return flag
 
@@ -200,5 +188,38 @@ def JudgePyInSentence(tar, sentence):
     return False
 
 
-TestExcel()
+# TestExcel()
 # print(JudgePyInSentence('披', '拼披萨'))
+
+def CompareChar2(tar, res):
+    pyin = ""
+    for ch in res:
+        if ch.encode('utf-8').isalpha():
+            pyin = pyin + ch
+        else:
+            break
+    pyin = pyin.lower()
+    sheng_diao = pinyin(tar, style=Style(0), heteronym=True)
+    return pyin in sheng_diao[0]
+
+
+def Check(tar, res):
+    substr = res[1:]
+    if CompareChar(tar, res[0]) or CompareChar2(tar, res):
+        # 第一个字识别正确
+        if JudgePyInSentence(tar, substr):
+            msg = "正确，识别字正确且组词正确"
+        else:
+            msg = "正确，识别字正确但组词错误"
+    else:
+        # 第一个字识别错误
+        if JudgePyInSentence(tar, substr):
+            if IsSimilarChar(tar, res[0]):
+                msg = "正确，识别字错误但在允许范围内，组词正确"
+            else:
+                msg = "错误，识别字错误但组词正确"
+        else:
+            msg = "错误，识别字错误且组词错误"
+    return msg
+
+print(Check("逐", "猪群雄逐鹿"))

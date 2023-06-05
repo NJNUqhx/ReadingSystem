@@ -23,7 +23,7 @@ from reading_system.models import Phrase
 from reading_system.models import PhraseOfGrade
 
 from reading_system.utils import chinesecharacter
-
+from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar
 def stu_home(request):
     info = request.session.get("info")
     if not info:
@@ -58,6 +58,9 @@ def stu_testOne(request):
 
 def stu_testTwo(request):
     return render(request, "stu_testTwo.html")
+
+def stu_testCorrect(request):
+    return render(request, "test_correct.html")
 
 @csrf_exempt
 def stu_testOneResult(request):
@@ -295,6 +298,15 @@ def get_exercise_list(request, nid=0):
         exercise_list = phrase.getPhrasesList()
         random.shuffle(exercise_list)
         return JsonResponse({"list": exercise_list})
+    elif nid == 4:
+        grade = request.session.get('info')['grade']
+        exercise_list = gen.getChartOriginal()
+        list = []
+        for level in range(0, 6):
+            for ch in exercise_list[level]:
+                list.append(ch[0])
+        random.shuffle(list)
+        return JsonResponse({"character": list[0]})
 
 
 from datetime import datetime
@@ -327,6 +339,30 @@ def stu_recognizeSpeech(request, nid=0):
     if nid == 3:
         if isinstance(res, str):
             return JsonResponse({"result": res, "success":True})
+        else:
+            return JsonResponse({"success":False})
+    # 准确性测试模拟测试
+    if nid == 4:
+        if isinstance(res, str) and chinesecharacter.JudgeCharacter(res[0]):
+            tar = receive["target"]
+            msg = ""
+            substr = res[1:]
+            if CompareChar(tar, res[0]):
+                # 第一个字识别正确
+                if JudgePyInSentence(tar, substr):
+                    msg = "回答正确，识别字正确且组词正确"
+                else:
+                    msg = "回答正确，识别字正确但组词错误"
+            else:
+                # 第一个字识别错误
+                if JudgePyInSentence(tar, substr):
+                    if IsSimilarChar(tar, res[0]):
+                        msg = "正确，识别字错误但在允许范围内，组词正确"
+                    else:
+                        msg = "错误，识别字错误但组词正确"
+                else:
+                    msg = "错误，识别字错误且组词错误"
+            return JsonResponse({"result": res, "success":True, "msg": msg})
         else:
             return JsonResponse({"success":False})
 
