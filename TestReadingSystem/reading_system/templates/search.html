@@ -1,0 +1,201 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>汉字属性检索</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-datepicker/css/bootstrap-datepicker.css' %}">
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+  <h1 id="title">汉字属性检索</h1>
+    <div class="input-group">
+      <input type="text" class="form-control" size="30" maxlength="30" placeholder="请输入检索的汉字、拼音或者部件" id="content">
+      <div class="input-group-btn">
+        <span class="input-group-btn">
+        <button class="btn btn-success" type="button" id="btn1">检索汉字</button>
+        <button class="btn btn-info" type="button" id="btn2">按拼音检索</button>
+        <button class="btn btn-primary" type="button" id="btn3">按部件检索</button>
+      </span>
+
+      </div><!-- /btn-group -->
+    </div><!-- /input-group -->
+        <div id="result-area">
+            <h2><b>检索结果</b></h2>
+            <p id="result1"></p>
+            <h2 id="result2"></h2>
+            <h2 id="result3"></h2>
+        </div>
+
+
+    </div>
+
+</div>
+</body>
+</html>
+
+<style>
+    #result-area{
+        margin-top: 1%;
+    }
+
+    #title{
+        text-align: center;
+        font-size: xxx-large;
+        margin-bottom: 2%;
+    }
+    .jumbotron{
+            background-image: url({% static 'img/background.jpeg' %});
+            background-size: cover;
+            margin-top: 2%;
+            margin-left: 10%;
+            margin-right: 10%;
+        font-size: large;
+        }
+    body{
+        background-image: url({% static 'img/background2.jpeg' %});
+            background-size: cover;
+    }
+    .container{
+
+    }
+   ul{
+        text-align: center;
+    }
+   #result{
+       margin-top: 5%;
+   }
+   p{
+       word-wrap:break-word;
+   }
+   table{
+       text-align: center;
+       margin-left: 20%;
+   }
+</style>
+
+<script src="{% static 'js/jquery-3.6.1.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+
+<script>
+    const btn1 = document.querySelector("#btn1");
+    const btn2 = document.querySelector("#btn2");
+    const btn3 = document.querySelector("#btn3");
+
+    function CreateTable(dic) {
+        let $td2;
+        let $td1;
+        var $table=$("<table></table>");
+        for (const [key, value] of Object.entries(dic)) {
+            var $tr=$("<tr></tr>");
+            if(value)
+            {
+                $td1 = $("<td>" + key.toString() + "</td>");
+                $tr.append($td1);
+                $td2 = $("<td>" + value.toString() + "</td>");
+                $tr.append($td2);
+            }
+            else
+            {
+                $td1 = $("<td>" + key.toString() + "</td>");
+                $tr.append($td1);
+                $td2 = $("<td>None</td>");
+                $tr.append($td2);
+            }
+            $table.append($tr);
+        }
+        $table.addClass()
+        $("#result1").append($table);
+    }
+
+    btn1.onclick = () =>{
+        tar = $("#content").val();
+        if(tar.length === 0)
+            return
+        if(tar.length > 1)
+        {
+            alert("只能输入一个待检索的汉字");
+            return
+        }
+        $.ajax({
+            url: "/search/character/",
+            type: "post",
+            data:{
+              ch: tar
+            },
+            success: function (resp){
+                var res = resp.res;
+                $("#result1").text("");
+                $("#result2").text("");
+                $("#result3").text("");
+                var format_str = ""
+                var dic = resp.dict;
+                for (const [key, value] of Object.entries(dic)) {
+                    if(value)
+                        format_str = format_str + key.toString() + ": " + value.toString() + "\n";
+                    else
+                        format_str = format_str + key.toString() + ": None \n";
+                }
+                {#$("#result1").text(format_str);#}
+                CreateTable(dic);
+            },
+            error:function(){
+                console.log("error");
+            }
+        })
+    }
+    btn2.onclick = () =>{
+        var tar = $("#content").val();
+        if(tar.length === 0)
+            return
+        $.ajax({
+            url: "/search/pyin/",
+            type: "post",
+            data:{
+              pyin: tar
+            },
+            success: function (resp){
+                var res = resp.res;
+                $("#result1").text("");
+                $("#result2").text(res);
+                $("#result3").text("");
+
+            },
+            error:function(){
+                console.log("error");
+            }
+        })
+    }
+
+    btn3.onclick = () =>{
+        var tar = $("#content").val();
+        if(tar.length > 1)
+        {
+            alert("只能输入一个待检索的部件");
+            return
+        }
+        if(tar.length === 0)
+            return
+        $.ajax({
+            url: "/search/component/",
+            type: "post",
+            data:{
+              component: tar
+            },
+            success: function (resp){
+                var res = resp.res;
+                $("#result1").text("");
+                $("#result2").text("");
+                $("#result3").text(res);
+            },
+            error:function(){
+                console.log("error");
+            }
+        })
+    }
+</script>

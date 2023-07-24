@@ -14,9 +14,7 @@ import os
 
 class Voice:
     def __init__(self):
-
         self.APP_ID = '28539468'
-
         self.API_KEY = '1WVq0iD4wgafFlyR6iaTeSVw'
         self.SECRET_KEY = 'hytBUK1zPCBL1eYYU71GRGLpoDeriSSD'
         self.client = AipSpeech(self.APP_ID, self.API_KEY, self.SECRET_KEY)
@@ -30,6 +28,12 @@ class Voice:
             data = f.read()
         result = self.client.asr(data, 'wav', 16000, {'dev_pid': 1536})
         return result['result'][0] if 'result' in result else result
+
+    def recognize2(self, file):
+        with open(file, 'rb') as f:
+            data = f.read()
+        result = self.client.asr(data, 'wav', 16000, {'dev_pid': 1536})
+        return result['result']
 
     def mp3towav(self, file, output_dir):
         fmt = os.path.basename(file).strip().split('.')[-1]

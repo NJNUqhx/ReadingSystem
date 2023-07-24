@@ -161,6 +161,7 @@ class Character(models.Model):
 
 
 class CharacterOfGrade(models.Model):
+    id = models.BigAutoField(primary_key=True)
     character = models.CharField(verbose_name="汉字", max_length=1)
     grade = models.IntegerField(verbose_name="年级")
     total_time = models.IntegerField(verbose_name="总次数")

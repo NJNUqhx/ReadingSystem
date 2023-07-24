@@ -22,6 +22,7 @@ from reading_system.utils.phrase import phrase
 from reading_system.models import Phrase
 from reading_system.models import PhraseOfGrade
 
+from reading_system.utils.Voice2 import ifly_recognize
 from reading_system.utils import chinesecharacter
 from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar
 def stu_home(request):
@@ -332,11 +333,13 @@ def stu_recognizeSpeech(request, nid=0):
     mp3_path = 'reading_system/static/speech/' + file_name + '.mp3'
     recognize_path = 'reading_system/static/wav/' + file_name + '.wav'
     voice.mp3towav(mp3_path, 'reading_system/static/wav/');
-    res = voice.recognize(recognize_path);
+    res = voice.recognize(recognize_path)
     res = check(res)
 
     # 识别测试音频
     if nid == 3:
+        res2 = voice.recognize2(recognize_path)
+        print(res2)
         if isinstance(res, str):
             return JsonResponse({"result": res, "success":True})
         else:
@@ -373,15 +376,32 @@ def stu_recognizeSpeech(request, nid=0):
     if isinstance(res, str):
         wav_result.result = res
     wav_result.target = receive["character"]
+
+    # 讯飞语音识别
+    rset = []
+    if nid == 0:
+        rset = ifly_recognize.recognize(recognize_path)
+        for elem in rset:
+            wav_result.result += ";" + elem
+        rset.append(res)
+        res = wav_result.result
+
     wav_result.save()
 
     grade = int(dic['grade'])
 
     # 准确性测试
     if nid == 0:
-        if isinstance(res, str):
+        if True or isinstance(res, str):
             tar = receive["character"]
-            flag = chinesecharacter.CheckCharacter(tar, res)
+            # flag = chinesecharacter.CheckCharacter(tar, res)
+            flag = False
+            for elem in rset:
+                if len(elem) > 1:
+                    elem = elem[0]
+                flag = chinesecharacter.CompareChar(tar, elem)
+                if flag:
+                    break
 
             # 所有年级统计结果
             if models.Character.objects.filter(character=tar).exists():
@@ -397,15 +417,20 @@ def stu_recognizeSpeech(request, nid=0):
                     row_object.accurate_time = row_object.accurate_time + 1
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
+
             # 每个年级统计结果
+            print("统计年级结果")
             if models.CharacterOfGrade.objects.filter(character=tar,grade=grade).exists():
+                print("存在" + tar)
                 row_object = models.CharacterOfGrade.objects.filter(character=tar,grade=grade).first()
+                print(row_object)
                 row_object.total_time = row_object.total_time + 1
                 if flag:
                     row_object.accurate_time = row_object.accurate_time + 1
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
             else:
+                print("不存在" + tar)
                 row_object = CharacterOfGrade(character=tar, grade=grade,total_time=1, accurate_time=0)
                 if flag:
                     row_object.accurate_time = row_object.accurate_time + 1

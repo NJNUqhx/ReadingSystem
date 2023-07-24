@@ -5,6 +5,7 @@ import re
 import pandas as pd
 from numpy import *
 from pypinyin import pinyin
+from reading_system.utils.chinesecharacter import LCS, LCS_str, TransDigit
 
 LISTNUM = 10
 
@@ -180,44 +181,13 @@ class Gen_chart:
                 return True
         return False
 
-
     def compareSentenceRight(self, str1, str2):
-        res = ""
-        mark = 0
-        i = 0
-        j = 0
-        cnt = 0
-        for i in range(len(str1)):
-            if (self.compareChar(str1[i], str2[j])):
-                res = res + str2[j]
-                cnt += 1
-                i += 1
-                j += 1
-                mark = j
-            else:
-                j += 1
-                if (j == len(str2) - 1):
-                    i += 1
-                    j = mark
-        return res
+        str1 = TransDigit(str1)
+        return LCS_str(str1, str2)
+
     # 比较句子
     def compareSentence(self, str1, str2):
-        mark = 0
-        i = 0
-        j = 0
-        cnt = 0
-        for i in range(len(str1)):
-            if (self.compareChar(str1[i], str2[j])):
-                cnt += 1
-                i += 1
-                j += 1
-                mark = j
-            else:
-                j += 1
-                if (j == len(str2) - 1):
-                    i += 1
-                    j = mark
-        return cnt
+        return LCS(str1, str2)
 
     # 阅读流畅性测试1
     def getChart2(self):
@@ -343,7 +313,5 @@ class Gen_chart:
         return resultList
 
 
-
 file = 'reading_system/static/character/hanzi1.xlsx'
-gen = Gen_chart(open('reading_system/static/character/2.txt', mode='r'), file)
-
+gen = Gen_chart(open('reading_system/static/character/2.txt', mode='r', encoding='gbk'), file)

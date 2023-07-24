@@ -58,7 +58,7 @@
     let info = {total: 0, wrong: 0};
 
     {#修改错误上限#}
-    let wrong_limit = 15;
+    let wrong_limit = 5;
 
     let score = 0;
     let literacy = 0.0;
@@ -174,6 +174,8 @@
     let recording = false;
     let wav_name = "";
 
+    let goto_next = true;
+
 
     if (navigator.mediaDevices.getUserMedia) {
     const constraints = { audio: true };
@@ -190,24 +192,35 @@
                     checkTime();
                 }
 
+                // 确保上一个音频识别结束进入下一题
+                if(goto_next === true)
+                {
+                    if(recording === true)
+                        goto_next = false;
 
-                wav_name = name;
+                    wav_name = name;
 
-                name = file_name();
-                // 发送汉字和录音判断正误
-                // 返回回答正误
+                    name = file_name();
+                    // 发送汉字和录音判断正误
+                    // 返回回答正误
 
-                for (let i = 0; i < 1; i++) {
-                    // 题目更新为下一个汉字
-                    $('#exercise').text(exercises[idx]['ch']);
-                    pre_exercise = cur_exercise;
-                    cur_exercise = exercises[idx];
-                    if (idx === exercises.length)
-                        getExerciseList();
-                    idx = (idx + exercises.length + 1) % exercises.length;
+                    for (let i = 0; i < 1; i++) {
+                        // 题目更新为下一个汉字
+                        $('#exercise').text(exercises[idx]['ch']);
+                        pre_exercise = cur_exercise;
+                        cur_exercise = exercises[idx];
+                        if (idx === exercises.length - 1){
+                            getExerciseList();
+                            idx = 0;
+                        }
+                        else {
+                            idx = (idx + exercises.length + 1) % exercises.length;
+                        }
+                    }
+                    name = name + cur_exercise['ch'];
                 }
-                name = name + cur_exercise['ch'];
 
+                // 只有一开始运行这个
                 if (recording === false) {
                     recording = true;
                     mediaRecorder.start();
@@ -215,6 +228,7 @@
                         chunks.push(e.data);
                     };
                 } else {
+
                     mediaRecorder.stop();
                     mediaRecorder.onstop = e => {
                         var blob = new Blob(chunks, {type: "audio/mpeg;"});
@@ -237,34 +251,31 @@
                         xhr.open('POST', '/speech/save/');
                         xhr.send(fd);
 
-
-                        mediaRecorder.start();
-                        mediaRecorder.ondataavailable = function (e) {
-                            chunks.push(e.data);
-                        };
-                    $.ajax({
+                        const tar_character = pre_exercise['ch'];
+                        // 识别音频并返回结果
+                        $.ajax({
                         url: '/stu/recognition/0/',
                         type: 'post',
                         data: {
                             file_name: wav_name,
-                            character: pre_exercise['ch']
+                            character: tar_character
                         },
                         success: function(res){
                             console.log(all_characters);
                             console.log(wrong_characters);
 
-                            all_characters = all_characters + pre_exercise['ch'];
+                            all_characters = all_characters + tar_character;
                             if(res.result !== "error")
                             {
                                 info.total++;
                                 total_level[pre_exercise['level']]++;
                                 if(res.right === false){
                                     info.wrong++;
-                                    wrong_characters = wrong_characters + pre_exercise['ch'];
+                                    wrong_characters = wrong_characters + tar_character;
                                 }
                                 else {
                                     right_level[pre_exercise['level']]++;
-                                    recognized_characters = recognized_characters + pre_exercise['ch'];
+                                    recognized_characters = recognized_characters + tar_character;
                                 }
                             }
                             else
@@ -272,16 +283,27 @@
                                 info.total++;
                                 total_level[pre_exercise['level']]++;
                                 info.wrong++;
-                                wrong_characters = wrong_characters + pre_exercise['ch'];
-                                not_recognized_characters = not_recognized_characters + pre_exercise['ch'];
+                                wrong_characters = wrong_characters + tar_character;
+                                not_recognized_characters = not_recognized_characters + tar_character;
                             }
 
                             console.log(pre_exercise);
                             console.log(res);
                             console.log(wrong_characters);
                             console.log(not_recognized_characters);
-                    }
+                    },
+                        error: function(){
+                            // alert(tar_character + "后台出错");
+                        }
                     })
+
+                        goto_next = true;
+                        // 继续下一个汉字的录音
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+
                     }
 
                 }

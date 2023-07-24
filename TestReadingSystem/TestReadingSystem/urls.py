@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from reading_system.views import stu, tec, exercise, account, function
+from reading_system.views import stu, tec, exercise, account, function, search
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
@@ -86,6 +86,12 @@ urlpatterns = [
 
     # 模拟测试
     path('test/voice/', function.test_voice),
-    path('test/correct/', stu.stu_testCorrect)
+    path('test/correct/', stu.stu_testCorrect),
+
+    # 汉字属性检索
+    path('search/', search.SearchHome),
+    path('search/character/', search.SearchCharacter),
+    path('search/component/', search.SearchCharacterByComponent),
+    path('search/pyin/', search.SearchCharacterByPyin)
 
 ]
