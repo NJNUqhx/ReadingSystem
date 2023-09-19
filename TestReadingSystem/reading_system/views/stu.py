@@ -377,7 +377,7 @@ def stu_recognizeSpeech(request, nid=0):
         wav_result.result = res
     wav_result.target = receive["character"]
 
-    # 讯飞语音识别
+    # 讯飞语音识别并存储识别结果
     rset = []
     if nid == 0:
         rset = ifly_recognize.recognize(recognize_path)
@@ -390,16 +390,26 @@ def stu_recognizeSpeech(request, nid=0):
 
     grade = int(dic['grade'])
 
+    err_msg = "err_msgerr_nosn"
+
     # 准确性测试
     if nid == 0:
         if True or isinstance(res, str):
             tar = receive["character"]
-            # flag = chinesecharacter.CheckCharacter(tar, res)
             flag = False
+            again = False
+
+            # 存在 error_msg 则重新朗读
+            if err_msg in rset:
+                again = True
+                return JsonResponse({"target": tar, "result": res, "right": flag, "again": again})
+
             for elem in rset:
                 if len(elem) > 1:
-                    elem = elem[0]
-                flag = chinesecharacter.CompareChar(tar, elem)
+                    flag = chinesecharacter.JudgePyInSentenceStrict(tar, elem)
+                else:
+                    flag = chinesecharacter.CompareChar(tar, elem)
+                # 正确结果已经在数组中，则直接返回
                 if flag:
                     break
 
@@ -419,27 +429,24 @@ def stu_recognizeSpeech(request, nid=0):
                 row_object.save()
 
             # 每个年级统计结果
-            print("统计年级结果")
             if models.CharacterOfGrade.objects.filter(character=tar,grade=grade).exists():
-                print("存在" + tar)
                 row_object = models.CharacterOfGrade.objects.filter(character=tar,grade=grade).first()
-                print(row_object)
                 row_object.total_time = row_object.total_time + 1
                 if flag:
                     row_object.accurate_time = row_object.accurate_time + 1
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
             else:
-                print("不存在" + tar)
                 row_object = CharacterOfGrade(character=tar, grade=grade,total_time=1, accurate_time=0)
                 if flag:
                     row_object.accurate_time = row_object.accurate_time + 1
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
 
-            return JsonResponse({"result": res, "right": flag})
+            return JsonResponse({"target": tar, "result": res, "right": flag, "again": again, })
         else:
-            return JsonResponse({"result": "error", "right": False})
+            return JsonResponse({"target": tar, "result": "error", "right": False})
+
     elif nid == 1:
         if not isinstance(res, str):
             return JsonResponse({"result": "error"})

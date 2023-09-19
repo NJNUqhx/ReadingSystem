@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'TestReadingSystem.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dbReadingSystem',
+        'NAME': 'readingsystem',
         'USER': 'root',
         'PASSWORD': 'qhx286118',
         'HOST': '127.0.0.1',

@@ -146,36 +146,6 @@ def JudgeCharacter(ch):
 
 #
 #
-def TestExcel():
-    # 初始化表格
-    cur_time = time.time().__str__()
-    excel_path = "reading_system/static/result/result" + cur_time + ".xlsx"
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = 'Excel'
-    ws['A1'] = '目标汉字'
-    ws['B1'] = '识别结果'
-    ws['C1'] = '判断结果'
-    ws['D1'] = '测试时间'
-    ws['E1'] = '学生账号'
-    result = models.WavRecognitionResult.objects.all()
-    row = 2
-    for obj in result:
-        tar = obj.target
-        res = obj.result
-
-        ws.cell(row, 1).value = tar
-        ws.cell(row, 2).value = res
-
-        msg = "识别错误或朗读错误"
-        for elem in res:
-            if JudgeCharacter(elem) and CompareChar(tar, elem):
-                msg = "朗读正确, " + tar + " 和 " + elem + "读音相同"
-        ws.cell(row, 3).value = msg
-        ws.cell(row, 4).value = obj.exercise_time.__str__()
-        ws.cell(row, 5).value = obj.stu
-        row += 1
-    wb.save(excel_path)
 
 
 def CheckCharacter(tar, sentence):
@@ -347,9 +317,12 @@ from reading_system.models import CharacterOfGrade
 
 
 def TestSQL():
-    print(CharacterOfGrade.objects.filter(character='即', grade=3).exists())
-    row_object = CharacterOfGrade.objects.filter(character='即', grade=3).all()
+    print(CharacterOfGrade.objects.filter(character='蝠', grade=3).exists())
+    row_object = CharacterOfGrade.objects.filter(character='蝠', grade=3).all()
     print(row_object)
+
+
+TestSQL()
 
 
 # TestSQL()
@@ -379,5 +352,71 @@ def TestCorrect(tar, rset):
     return flag
 
 
-rset = ["库水库","酷","苦水","酷","库","酷","水库"]
-print(TestCorrect("库", rset))
+def TestChineseCharacter():
+    from reading_system.utils import chinesecharacter
+    tar = "跷"
+    sentence = "壳;翘;俏;撬;窍;鞘;"
+    print("目标汉字读音: ", chinesecharacter.GetPinyin(tar))
+    for elem in sentence:
+        if chinesecharacter.JudgeCharacter(elem):
+            print("识别汉字读音: ", chinesecharacter.GetPinyin(elem))
+    flag1 = chinesecharacter.JudgePyInSentence(tar, sentence)
+    flag2 = chinesecharacter.JudgePyInSentenceStrict(tar, sentence)
+    print(flag1, flag2)
+
+
+def TestExcel():
+    from reading_system.utils import chinesecharacter
+
+    # 初始化表格
+    cur_time = time.time().__str__()
+    excel_path = "reading_system/static/result/result" + cur_time + ".xlsx"
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Excel'
+    ws['A1'] = '目标汉字'
+    ws['B1'] = '识别结果'
+    ws['C1'] = '判断结果'
+    ws['D1'] = '测试时间'
+    ws['E1'] = '学生账号'
+    ws['F1'] = '测试类型'
+    result = models.WavRecognitionResult.objects.all()
+    row = 2
+    for obj in result:
+        tar = obj.target
+        res = obj.result
+
+        ws.cell(row, 1).value = tar
+        ws.cell(row, 2).value = res
+
+        msg = "识别错误或朗读错误"
+
+        if len(tar) == 1:
+            ws.cell(row, 6).value = "识别单字"
+            for elem in res:
+                if chinesecharacter.JudgeCharacter(elem) and chinesecharacter.JudgePyInSentenceStrict(tar, elem):
+                    msg = "朗读正确, " + tar + " 和 " + elem + "读音相同"
+
+        elif len(tar) < 5:
+            ws.cell(row, 6).value = "识别词语"
+            ans_len = chinesecharacter.LCS(tar, res)
+            ans_str = chinesecharacter.LCS_str(tar, res)
+            if len(tar) == ans_len:
+                msg = "完全正确"
+            else:
+                msg = "部分正确，朗读正确: " + ans_str
+        else:
+            ws.cell(row, 6).value = "识别句子"
+            ans_len = chinesecharacter.LCS(tar, res)
+            ans_str = chinesecharacter.LCS_str(tar, res)
+            if len(tar) == ans_len:
+                msg = "完全正确"
+            else:
+                msg = "部分正确，朗读正确: " + ans_str
+
+        ws.cell(row, 3).value = msg
+        ws.cell(row, 4).value = obj.exercise_time.__str__()
+        ws.cell(row, 5).value = obj.stu
+        row += 1
+    wb.save(excel_path)
+    print("生成分析 Excel 成功")

@@ -31,6 +31,7 @@ def IsSimilarChar(ch1, ch2):
             flag3 = True
     return flag1 or flag2 or flag3
 
+
 def GetPinyin(ch):
     # 返回 ch 的所有拼音含声调
     res = pinyin(ch, heteronym=True)
@@ -75,6 +76,17 @@ def JudgePyInSentence(tar, sentence):
     for elem in res1:
         for ch in sentence:
             res2 = GetPinyin2(ch)
+            if elem in res2:
+                return True
+    return False
+
+
+def JudgePyInSentenceStrict(tar, sentence):
+    # 查看目标汉字的拼音(不含声调)是否在句子中
+    res1 = GetPinyin(tar)
+    for elem in res1:
+        for ch in sentence:
+            res2 = GetPinyin(ch)
             if elem in res2:
                 return True
     return False
@@ -248,6 +260,7 @@ class CharacterLists:
 
 
 def LCS(str1, str2):
+    # 返回最大公共子串长度
     m = len(str1)
     n = len(str2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -265,6 +278,7 @@ def LCS(str1, str2):
 
 
 def LCS_str(str1, str2):
+    # 返回最大公共子串
     m = len(str1)
     n = len(str2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
