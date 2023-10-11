@@ -399,11 +399,6 @@ def stu_recognizeSpeech(request, nid=0):
             flag = False
             again = False
 
-            # 存在 error_msg 则重新朗读
-            if err_msg in rset:
-                again = True
-                return JsonResponse({"target": tar, "result": res, "right": flag, "again": again})
-
             for elem in rset:
                 if len(elem) > 1:
                     flag = chinesecharacter.JudgePyInSentenceStrict(tar, elem)
@@ -412,6 +407,12 @@ def stu_recognizeSpeech(request, nid=0):
                 # 正确结果已经在数组中，则直接返回
                 if flag:
                     break
+
+            if not flag:
+                # 存在 error_msg 则重新朗读
+                if err_msg in rset:
+                    again = True
+                    return JsonResponse({"target": tar, "result": res, "right": flag, "again": again})
 
             # 所有年级统计结果
             if models.Character.objects.filter(character=tar).exists():
