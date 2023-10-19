@@ -1,3 +1,5 @@
+import copy
+
 from reading_system import models
 from pypinyin import pinyin, Style
 import openpyxl
@@ -259,8 +261,11 @@ class CharacterLists:
         return res
 
 
+# 辅助进行字符串比较
 def LCS(str1, str2):
     # 返回最大公共子串长度
+    str1 = TransDigit(str1)
+    str2 = TransDigit(str2)
     m = len(str1)
     n = len(str2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -279,6 +284,8 @@ def LCS(str1, str2):
 
 def LCS_str(str1, str2):
     # 返回最大公共子串
+    str1 = TransDigit(str1)
+    str2 = TransDigit(str2)
     m = len(str1)
     n = len(str2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -320,16 +327,64 @@ def LCS_str(str1, str2):
     return res
 
 
-def TransDigit(s):
-    for i in range(len(s)):
-        if str.isdigit(s[i]):
-            for j in range(i, len(s)):
-                if not str.isdigit(s[j]):
-                    print(s[i: j])
-                    digit = s[i: j]
-                    Dict = DigitDict()
-                    s = s.replace(digit, Dict[digit])
-                    return s
+def TransDigit(num):
+    chinese_dict = {
+        '0': '零',
+        '1': '一',
+        '2': '二',
+        '3': '三',
+        '4': '四',
+        '5': '五',
+        '6': '六',
+        '7': '七',
+        '8': '八',
+        '9': '九',
+    }
+
+    def convert_chunk(chunk):
+        chunk_str = str(chunk)
+        length = len(chunk_str)
+        result = ''
+        if length == 1:
+            result += chinese_dict[chunk_str]
+        elif length == 2:
+            if chunk_str[0] == '1':
+                if chunk_str[1] == '0':
+                    result += '十'
+                else:
+                    result += '十' + chinese_dict[chunk_str[1]]
+            else:
+                if chunk_str[1] == '0':
+                    result += chinese_dict[chunk_str[0]] + '十'
+                else:
+                    result += chinese_dict[chunk_str[0]] + '十' + chinese_dict[chunk_str[1]]
+        elif length == 3:
+            if chunk_str[1:] == '00':
+                result += chinese_dict[chunk_str[0]] + '百'
+            else:
+                result += chinese_dict[chunk_str[0]] + '百' + convert_chunk(int(chunk_str[1:]))
+        elif length == 4:
+            if chunk_str[1:] == '000':
+                result += chinese_dict[chunk_str[0]] + '千'
+            else:
+                result += chinese_dict[chunk_str[0]] + '千' + convert_chunk(int(chunk_str[1:]))
+        return result
+
+    result = ''
+    current_chunk = ''
+    for char in num:
+        if char.isdigit():
+            current_chunk += char
+        else:
+            if current_chunk:
+                result += convert_chunk(int(current_chunk))
+                current_chunk = ''
+            result += char
+
+    if current_chunk:
+        result += convert_chunk(int(current_chunk))
+
+    return result
 
 
 def DigitDict():

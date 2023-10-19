@@ -5,6 +5,9 @@
 
 <div class="container">
     <div class="jumbotron area" >
+        <div class = "finsh-area">
+            <button type="button" class="btn btn-danger btn-lg" id="finsh_test" onclick="finshTest()">结束</button>
+        </div>
         <div class="exercise-area">
             <label id="exercise">点击右下角按键开始</label>
         </div>
@@ -44,6 +47,9 @@
     .exercise-area{
         text-align: center;
         margin-bottom: 10%;
+    }
+    #finsh_test{
+        float: right;
     }
 </style>
 {% endblock %}
@@ -118,6 +124,14 @@
     let idx = 0;
     let pre_exercises = {"content":"", "correct":true};
     let cur_exercises = {"content":"", "correct":true};
+
+    let finsh_test = false;
+
+    function finshTest()
+    {
+        finsh_test = true;
+    }
+
     function getExerciseList(){
         $.ajax({
             url: "/stu/exercise/list/2/",
@@ -137,7 +151,7 @@
     let wrong = "";
 
     function checkTime(){
-        if(idx === exercises.length || getSeconds() > time_limit){
+        if(finsh_test || idx === exercises.length || getSeconds() > time_limit){
             $.ajax({
                 url: "/stu/uploadInfo/2/",
                 type: "post",
@@ -334,7 +348,7 @@
                             info.total += res["len"];
                             info.right += res["cnt"];
                             info.judge_all += 1;
-                            info.wrong += res["wrong"];
+                            info.wrong += res["wrong"] + ";";
                             if(pre_exercises["correct"] === true)
                                 info.judge_right += 1;
                             console.log(info);

@@ -106,7 +106,6 @@
     function finshTest()
     {
         finsh_test = true;
-        checkTime();
     }
 
     {#到达截止时间后跳转#}
@@ -388,6 +387,9 @@
 
                     },
                         error: function(){
+                            // 将当前识别错误汉字加入测试题目末尾
+                            exercises.push(cur_exercise);
+
                             read_again = 0;
                             console.log("识别出错")
                             $("#tip").text(tar_character + " : 识别出错");

@@ -181,7 +181,7 @@ class Gen_chart:
                 return True
         return False
 
-    def compareSentenceRight(self, str1, str2):
+    def compareSentenceRight(self, str1: str, str2: str):
         str1 = TransDigit(str1)
         return LCS_str(str1, str2)
 

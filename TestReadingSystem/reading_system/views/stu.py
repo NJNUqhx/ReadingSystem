@@ -24,7 +24,10 @@ from reading_system.models import PhraseOfGrade
 
 from reading_system.utils.Voice2 import ifly_recognize
 from reading_system.utils import chinesecharacter
-from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar
+from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar, LCS, LCS_str
+
+
+
 def stu_home(request):
     info = request.session.get("info")
     if not info:
@@ -394,7 +397,7 @@ def stu_recognizeSpeech(request, nid=0):
 
     # 准确性测试
     if nid == 0:
-        if True or isinstance(res, str):
+        if isinstance(res, str):
             tar = receive["character"]
             flag = False
             again = False
@@ -452,8 +455,10 @@ def stu_recognizeSpeech(request, nid=0):
         if not isinstance(res, str):
             return JsonResponse({"result": "error"})
         tar = receive["character"]
+
         right = gen.compareSentenceRight(res, tar)
         cnt = gen.compareSentence(res, tar)
+
         wrong = ""
         for ch in tar:
             if not ch in right:
@@ -475,6 +480,7 @@ def stu_recognizeSpeech(request, nid=0):
                 row_object.save()
         return JsonResponse({"result": res, "cnt": cnt, "wrong": wrong, "len": len(tar)})
     elif nid == 2:
+        # 阅读流畅性测试二
         if not isinstance(res, str):
             return JsonResponse({"result": "error"})
         tar = receive["character"]
@@ -484,7 +490,7 @@ def stu_recognizeSpeech(request, nid=0):
         # 所有年级统计结果
         obj = models.Exercise.objects.get(content=tar)
         obj.total += 1
-        if flag:
+        if flag == obj.right:
             obj.right += 1
         if obj.total != 0:
             obj.accuracy = float(obj.right) / float(obj.total);
@@ -494,20 +500,20 @@ def stu_recognizeSpeech(request, nid=0):
         if models.ExerciseOfGrade.objects.filter(content=tar, grade=grade).exists():
             row_object = models.ExerciseOfGrade.objects.filter(content=tar, grade=grade).first()
             row_object.total = row_object.total + 1
-            if flag:
+            if flag == obj.right:
                 row_object.right = row_object.right + 1
             row_object.accuracy = row_object.right / row_object.total
             row_object.save()
         else:
             row_object = ExerciseOfGrade(content=tar, grade=grade, total=1, right=0)
-            if flag:
+            if flag == obj.right:
                 row_object.right = row_object.right + 1
             row_object.accuracy = row_object.right / row_object.total
             row_object.save()
 
 
-        right = gen.compareSentenceRight(res, tar)
-        cnt = gen.compareSentence(res, tar)
+        right = LCS_str(res, tar)
+        cnt = LCS(res, tar)
         wrong = ""
         for ch in tar:
             if not ch in right:
@@ -528,14 +534,15 @@ def stu_recognizeSpeech(request, nid=0):
                 row_object.accuracy = row_object.accurate_time / row_object.total_time
                 row_object.save()
         return JsonResponse({"result": res, "cnt": cnt, "wrong": wrong, "len": len(tar)})
-    elif nid == 4:
-        if not isinstance(res, str):
+    elif nid == 5:
+        # 阅读流畅性测试一
+        if not isinstance(res, str) or len(res) == 0:
             return JsonResponse({"result": "error"})
 
         ## 统计词语中读正确的汉字
         tar = receive["character"]
-        right = gen.compareSentenceRight(res, tar)
-        cnt = gen.compareSentence(res, tar)
+        right = LCS_str(res, tar)
+        cnt = LCS(res, tar)
         wrong = ""
         phrase = receive["character"]
 

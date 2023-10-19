@@ -206,77 +206,6 @@ def Check(tar, res):
     return msg
 
 
-def LCS(str1, str2):
-    m = len(str1)
-    n = len(str2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-
-    max_len = 0
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            if CompareChar(str1[i - 1], str2[j - 1]):
-                dp[i][j] = dp[i - 1][j - 1] + 1
-                if max_len < dp[i][j]:
-                    max_len = dp[i][j]
-            else:
-                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-    return max_len
-
-
-def LCS_str(str1, str2):
-    m = len(str1)
-    n = len(str2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-    tr = [[0] * (n + 1) for _ in range(m + 1)]
-    '''
-    1: 斜向上
-    2: 向左
-    3: 向上
-    '''
-    max_len = 0
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            if CompareChar(str1[i - 1], str2[j - 1]):
-                dp[i][j] = dp[i - 1][j - 1] + 1
-                tr[i][j] = 1
-                if max_len < dp[i][j]:
-                    max_len = dp[i][j]
-            else:
-                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-                if dp[i][j] == dp[i - 1][j]:
-                    tr[i][j] = 3
-                else:
-                    tr[i][j] = 2
-
-    res = ""
-    i = m
-    j = n
-    while i and j:
-        if tr[i][j] == 0:
-            break
-        elif tr[i][j] == 1:
-            res = str1[i - 1] + res
-            i -= 1
-            j -= 1
-        elif tr[i][j] == 2:
-            j -= 1
-        else:
-            i -= 1
-    return res
-
-
-def TransDigit(s):
-    for i in range(len(s)):
-        if str.isdigit(s[i]):
-            for j in range(i, len(s)):
-                if not str.isdigit(s[j]):
-                    print(s[i: j])
-                    digit = s[i: j]
-                    Dict = DigitDict()
-                    s = s.replace(digit, Dict[digit])
-                    return s
-
-
 def DigitDict():
     file_name = "reading_system/static/character/digits.txt"
     dict = {}
@@ -320,9 +249,6 @@ def TestSQL():
     print(CharacterOfGrade.objects.filter(character='蝠', grade=3).exists())
     row_object = CharacterOfGrade.objects.filter(character='蝠', grade=3).all()
     print(row_object)
-
-
-TestSQL()
 
 
 # TestSQL()
@@ -420,3 +346,52 @@ def TestExcel():
         row += 1
     wb.save(excel_path)
     print("生成分析 Excel 成功")
+
+
+def DrawWavform():
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from scipy.io import wavfile
+    # 读取.wav文件
+    sample_rate, data = wavfile.read('reading_system/static/wav/2023629583呼.wav')
+
+    # 将数据转换为浮点数
+    data = data.astype(np.float32)
+
+    # 计算时间轴
+    time = np.arange(0, len(data)) / sample_rate
+
+    # 绘制波形图
+    plt.figure()
+    plt.plot(time, data)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Amplitude')
+    plt.title('Waveform of audio.wav')
+    plt.show()
+
+
+def TestFloat():
+    sum = 0.0
+    a = float("1.0") + 2
+    b = "1.0"
+    print(a, b)
+
+
+def TestExercises():
+    from reading_system.utils.chooseList import gen
+    exercise_list = gen.getChartOriginal()
+    print(exercise_list)
+
+
+def TestChineserCharacter():
+    from reading_system.utils.chinesecharacter import LCS, LCS_str
+    str1 = "你好小明123"
+    str2 = "你好世界146"
+
+    print(LCS(str1, str2))
+    print(LCS_str(str1, str2))
+
+    print(str1, str2)
+
+
+TestChineserCharacter()

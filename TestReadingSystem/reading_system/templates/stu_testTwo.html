@@ -5,6 +5,9 @@
 
 <div class="container">
     <div class="jumbotron area" >
+        <div class = "finsh-area">
+            <button type="button" class="btn btn-danger btn-lg" id="finsh_test" onclick="finshTest()">结束</button>
+        </div>
         <div id="exercise-area">
             <label id="exercise">词语</label>
         </div>
@@ -40,6 +43,9 @@
     }
     .answer-area{
         margin-top: 200px;
+    }
+    #finsh_test{
+        float: right;
     }
 </style>
 {% endblock %}
@@ -110,6 +116,14 @@
     let idx = 0;
     let pre_exercise = {"phrase": "词语", len: 2};
     let cur_exercise = {"phrase": "词语", len: 2};
+
+    let finsh_test = false;
+
+    function finshTest()
+    {
+        finsh_test = true;
+    }
+
     function getExerciseList(){
         $.ajax({
             {#url: "/stu/exercise/list/1/",#}
@@ -130,11 +144,9 @@
     let wrong = "";
 
     function checkTime(){
-        let time = getTime();
-        {# 之前判断结束的标志 #}
         let flag = group > 12 || getSeconds() > 60;
         let new_flag = getSeconds() > 60 || idx >= exercises.length - 1;
-        if(new_flag) {
+        if(finsh_test || new_flag) {
             $.ajax({
                 url: "/stu/uploadInfo/1/",
                 type: "post",
@@ -230,7 +242,7 @@
                     info.time = getSeconds();
 
                     $.ajax({
-                        url: '/stu/recognition/4/',
+                        url: '/stu/recognition/5/',
                         type: 'post',
                         data: {
                             file_name: wav_name,
@@ -241,7 +253,7 @@
                             {
                                 info.total += pre_exercise["len"];
                                 info.right += res.cnt;
-                                info.wrong += res.wrong;
+                                info.wrong += res.wrong + ";";
                                 console.log(res);
                                 console.log(info);
                             }else{
