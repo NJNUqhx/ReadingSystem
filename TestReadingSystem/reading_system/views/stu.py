@@ -24,7 +24,7 @@ from reading_system.models import PhraseOfGrade
 
 from reading_system.utils.Voice2 import ifly_recognize
 from reading_system.utils import chinesecharacter
-from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar, LCS, LCS_str
+from reading_system.utils.chinesecharacter import JudgePyInSentence, IsSimilarChar, CompareChar, LCS, LCS_str, GenExerciseList
 
 
 
@@ -269,18 +269,7 @@ def stu_uploadTestTwo(request):
 def get_exercise_list(request, nid=0):
     if nid == 0:
         grade = request.session.get('info')['grade']
-        exercise_list = gen.getChartOriginal()
-        list = []
-        if grade >= 1 and grade <= 2:
-            # 对应难度 1 2 3 4 5 6
-            for level in range(0, 6):
-                for ch in exercise_list[level]:
-                    list.append({"ch":ch[0], "level":ch[1]})
-        else:
-            for level in range(1, 10):
-                for ch in exercise_list[level]:
-                    list.append({"ch":ch[0], "level":ch[1]})
-        random.shuffle(list)
+        list = GenExerciseList(grade)
         return JsonResponse({"list": list})
     elif nid == 1:
         exercise_list = gen.getChart2()

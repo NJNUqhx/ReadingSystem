@@ -378,9 +378,34 @@ def TestFloat():
 
 
 def TestExercises():
+    exercise_list = GenExerciseList(1)
+    print(len(exercise_list))
+    exercise_list = GenExerciseList(3)
+    print(len(exercise_list))
+
+
+def GenExerciseList(grade):
     from reading_system.utils.chooseList import gen
-    exercise_list = gen.getChartOriginal()
-    print(exercise_list)
+    import random
+    list = []
+    while len(list) < 100:
+        exercise_list = gen.getChartOriginal()
+        if 1 <= grade <= 2:
+            # 对应难度 1 2 3 4 5 6
+            for level in range(0, 6):
+                for ch in exercise_list[level]:
+                    elem = {"ch": ch[0], "level": ch[1]}
+                    if elem not in list:
+                        list.append(elem)
+        else:
+            for level in range(1, 10):
+                for ch in exercise_list[level]:
+                    elem = {"ch": ch[0], "level": ch[1]}
+                    if elem not in list:
+                        list.append(elem)
+    random.shuffle(list)
+    return list
+
 
 
 def TestChineserCharacter():
@@ -394,4 +419,4 @@ def TestChineserCharacter():
     print(str1, str2)
 
 
-TestChineserCharacter()
+TestExercises()
