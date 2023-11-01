@@ -319,27 +319,30 @@ def TestExcel():
 
         if len(tar) == 1:
             ws.cell(row, 6).value = "识别单字"
-            for elem in res:
-                if chinesecharacter.JudgeCharacter(elem) and chinesecharacter.JudgePyInSentenceStrict(tar, elem):
-                    msg = "朗读正确, " + tar + " 和 " + elem + "读音相同"
-
+            rset = SplitWavResult(res)
+            for elem in rset:
+                if len(elem) == 1:
+                    if CompareSingleCharacter(tar, elem):
+                        msg = "朗读正确，" + tar + " 与 " + elem + "读音相同"
+                elif len(elem) > 1:
+                    if CompareSingleCharacterInSentence(tar, elem):
+                        msg = "朗读正确，" + tar + "在词语 " + elem + " 中"
         elif len(tar) < 5:
             ws.cell(row, 6).value = "识别词语"
             ans_len = chinesecharacter.LCS(tar, res)
             ans_str = chinesecharacter.LCS_str(tar, res)
             if len(tar) == ans_len:
                 msg = "完全正确"
-            else:
-                msg = "部分正确，朗读正确: " + ans_str
+            elif ans_len > 0:
+                msg = "部分正确，朗读正确部分: " + ans_str
         else:
             ws.cell(row, 6).value = "识别句子"
             ans_len = chinesecharacter.LCS(tar, res)
             ans_str = chinesecharacter.LCS_str(tar, res)
             if len(tar) == ans_len:
                 msg = "完全正确"
-            else:
-                msg = "部分正确，朗读正确: " + ans_str
-
+            elif ans_len > 0:
+                msg = "部分正确，朗读正确部分: " + ans_str
         ws.cell(row, 3).value = msg
         ws.cell(row, 4).value = obj.exercise_time.__str__()
         ws.cell(row, 5).value = obj.stu
@@ -407,7 +410,6 @@ def GenExerciseList(grade):
     return list
 
 
-
 def TestChineserCharacter():
     from reading_system.utils.chinesecharacter import LCS, LCS_str
     str1 = "你好小明123"
@@ -419,4 +421,82 @@ def TestChineserCharacter():
     print(str1, str2)
 
 
-TestExercises()
+def SplitWavResult(wav_result):
+    rset = wav_result.split(";")
+    return rset
+
+
+from reading_system.utils.chinesecharacter import characterLists, pyinDict
+
+
+# 根据拼音字典，比较两个汉字是否是相同读音
+def CompareSingleCharacter(tar, src):
+    if len(src) != 1 or not JudgeCharacter(src):
+        return False
+    list1 = pyinDict[tar]
+    if src in pyinDict:
+        list2 = pyinDict[src]
+    else:
+        list2 = GetPinyin(src)
+    for elem in list1:
+        if elem in list2:
+            return True
+    return False
+
+
+# 根据拼音字典，查看汉字读音是否在句子中
+def CompareSingleCharacterInSentence(tar, src):
+    for ch in src:
+        if not JudgeCharacter(ch):
+            continue
+        flag = CompareSingleCharacter(tar, ch)
+        if flag:
+            return True
+    return False
+
+
+# 判断单个汉字的正确性，rset为候选结果的集合
+def JudgeSingleCharacter(tar, rset):
+    for elem in rset:
+        flag = False
+        if len(elem) == 1:
+            flag = CompareSingleCharacter(tar, elem)
+        elif len(elem) > 1:
+            flag = CompareSingleCharacterInSentence(tar, elem)
+        if flag:
+            return True
+    return False
+
+
+def GetDict(characterLists):
+    import re
+    pyinDict = {}
+    for elem in characterLists.characters:
+        # print(elem.dict["汉字"])
+        # print(elem.dict["拼音"])
+        pyin = elem.dict["拼音"]
+        pyinset = re.split(",|;", pyin)
+        pyinset = [x for x in pyinset if not x.isdigit()]
+        pyinDict[elem.dict["汉字"]] = pyinset
+    write_dict_to_file(pyinDict, "reading_system/static/character/pydict.txt")
+    return pyinDict
+
+
+# 测试判别识别结果是否正确
+def TestJudge():
+    from reading_system.utils.chinesecharacter import pyinDict
+    wav_result = "err_msgerr_nosn;打;把;答;拔;波;"
+    tar = '拨'
+    rset = SplitWavResult(wav_result)
+    print(JudgeSingleCharacter(tar, rset))
+
+
+# 将字典写入文件中
+def write_dict_to_file(dictionary, filename):
+    import json
+    with open(filename, 'w') as file:
+        for key, value in dictionary.items():
+            file.write(json.dumps({key: value}, ensure_ascii=False) + '\n')
+
+
+TestExcel()

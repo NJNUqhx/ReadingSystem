@@ -371,7 +371,7 @@ def stu_recognizeSpeech(request, nid=0):
 
     # 讯飞语音识别并存储识别结果
     rset = []
-    if nid == 0:
+    if nid == 0 or nid == 2 or nid == 5:
         rset = ifly_recognize.recognize(recognize_path)
         for elem in rset:
             wav_result.result += ";" + elem
@@ -388,17 +388,9 @@ def stu_recognizeSpeech(request, nid=0):
     if nid == 0:
         if isinstance(res, str):
             tar = receive["character"]
-            flag = False
             again = False
-
-            for elem in rset:
-                if len(elem) > 1:
-                    flag = chinesecharacter.JudgePyInSentenceStrict(tar, elem)
-                else:
-                    flag = chinesecharacter.CompareChar(tar, elem)
-                # 正确结果已经在数组中，则直接返回
-                if flag:
-                    break
+            # 判断 目标汉字 和 候选集合的关系
+            flag = chinesecharacter.JudgeSingleCharacter(tar,  rset)
 
             if not flag:
                 # 存在 error_msg 则重新朗读

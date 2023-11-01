@@ -273,7 +273,7 @@ def LCS(str1, str2):
     max_len = 0
     for i in range(1, m + 1):
         for j in range(1, n + 1):
-            if CompareChar(str1[i - 1], str2[j - 1]):
+            if CompareSingleCharacter(str1[i - 1], str2[j - 1]):
                 dp[i][j] = dp[i - 1][j - 1] + 1
                 if max_len < dp[i][j]:
                     max_len = dp[i][j]
@@ -298,7 +298,7 @@ def LCS_str(str1, str2):
     max_len = 0
     for i in range(1, m + 1):
         for j in range(1, n + 1):
-            if CompareChar(str1[i - 1], str2[j - 1]):
+            if CompareSingleCharacter(str1[i - 1], str2[j - 1]):
                 dp[i][j] = dp[i - 1][j - 1] + 1
                 tr[i][j] = 1
                 if max_len < dp[i][j]:
@@ -405,6 +405,32 @@ def DigitDict():
 characterLists = CharacterLists()
 
 
+# 将字典写入文件中
+def write_dict_to_file(dictionary, filename):
+    import json
+    with open(filename, 'w') as file:
+        for key, value in dictionary.items():
+            file.write(json.dumps({key: value}, ensure_ascii=False) + '\n')
+
+
+# 获取所有汉字的拼音字典
+def GetDict(chLists):
+    import re
+    pyDict = {}
+    for elem in chLists.characters:
+        # print(elem.dict["汉字"])
+        # print(elem.dict["拼音"])
+        pyin = elem.dict["拼音"]
+        pyinset = re.split(",|;", pyin)
+        pyinset = [x for x in pyinset if not x.isdigit()]
+        pyDict[elem.dict["汉字"]] = pyinset
+    write_dict_to_file(pyDict, "reading_system/static/character/pydict.txt")
+    return pyDict
+
+
+pyinDict = GetDict(characterLists)
+
+
 # 获取准确性测试题目
 def GenExerciseList(grade):
     from reading_system.utils.chooseList import gen
@@ -427,3 +453,48 @@ def GenExerciseList(grade):
                         list.append(elem)
     random.shuffle(list)
     return list
+
+
+# 处理识别结果，转化为list
+def SplitWavResult(wav_result):
+    rset = wav_result.split(";")
+    return rset
+
+
+# 比较两个汉字是否相同
+def CompareSingleCharacter(tar, src):
+    if len(src) != 1 or not JudgeCharacter(src):
+        return False
+    list1 = pyinDict[tar]
+    if src in pyinDict:
+        list2 = pyinDict[src]
+    else:
+        list2 = GetPinyin(src)
+    for elem in list1:
+        if elem in list2:
+            return True
+    return False
+
+
+# 根据拼音字典，查看汉字读音是否在句子中
+def CompareSingleCharacterInSentence(tar, src):
+    for ch in src:
+        if not JudgeCharacter(ch):
+            continue
+        flag = CompareSingleCharacter(tar, ch)
+        if flag:
+            return True
+    return False
+
+
+# 判断单个汉字的正确性，rset为候选结果的集合
+def JudgeSingleCharacter(tar, rset):
+    for elem in rset:
+        flag = False
+        if len(elem) == 1:
+            flag = CompareSingleCharacter(tar, elem)
+        elif len(elem) > 1:
+            flag = CompareSingleCharacterInSentence(tar, elem)
+        if flag:
+            return True
+    return False

@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/reading_system/static/character/2.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/reading_system/static/character/3.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/reading_system/static/character/pydict.txt" charset="GBK" />
   </component>
 </project>
