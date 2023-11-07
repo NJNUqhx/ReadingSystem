@@ -168,9 +168,10 @@ class CharacterOfGrade(models.Model):
     accurate_time = models.IntegerField(verbose_name="正确次数")
     accuracy = models.DecimalField(verbose_name="正确率", decimal_places=2, max_digits=3)
 
+
 class WavRecognitionResult(models.Model):
     stu = models.CharField(verbose_name="测试学生", max_length=4)
     path = models.CharField(verbose_name="音频路径", max_length=64)
     target = models.CharField(verbose_name="识别目标", max_length=32)
-    result = models.CharField(verbose_name="识别结果", max_length=32)
+    result = models.CharField(verbose_name="识别结果", max_length=256)
     exercise_time = models.DateTimeField(verbose_name="时间", default=timezone.now, null=False)

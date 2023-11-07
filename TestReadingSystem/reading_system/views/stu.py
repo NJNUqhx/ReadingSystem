@@ -493,8 +493,8 @@ def stu_recognizeSpeech(request, nid=0):
             row_object.save()
 
 
-        right = LCS_str(res, tar)
-        cnt = LCS(res, tar)
+        right = LCS_str(tar, res)
+        cnt = LCS(tar, res)
         wrong = ""
         for ch in tar:
             if not ch in right:
@@ -522,8 +522,8 @@ def stu_recognizeSpeech(request, nid=0):
 
         ## 统计词语中读正确的汉字
         tar = receive["character"]
-        right = LCS_str(res, tar)
-        cnt = LCS(res, tar)
+        right = LCS_str(tar, res)
+        cnt = LCS(tar, res)
         wrong = ""
         phrase = receive["character"]
 

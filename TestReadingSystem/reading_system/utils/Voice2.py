@@ -30,7 +30,7 @@ class Ws_Param(object):
         self.CommonArgs = {"app_id": self.APPID}
         # 业务参数(business)，更多个性化参数可在官网查看
         self.BusinessArgs = {"domain": "iat", "language": "zh_cn", "accent": "mandarin", "vinfo": 1, "vad_eos": 10000,
-                             "wbest": 5, "dwa": "wpgs", "ptt": 0}
+                             "wbest": 5,"nbset": 5, "dwa": "wpgs", "ptt": 0}
 
     def set_audiofile(self, path):
         self.AudioFile = path

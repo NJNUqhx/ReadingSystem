@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>中文示例</title>
+  <style>
+    body {
+      font-family: "Microsoft Yahei", Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1 id = "title">这是一个中文示例</h1>
+  <p>欢迎来到我的网站！</p>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('keydown', function(event) {
+            if (event.keyCode === 32) {
+                // 检测到按下空格键
+                var spaceEvent = new Event('spaceKeyPressed');
+                document.dispatchEvent(spaceEvent);
+            }
+        });
+
+        document.addEventListener('spaceKeyPressed', function() {
+            // 在此处编写空格键按下时要执行的代码
+            console.log("空格键被按下了");
+        });
+
+    document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey) {
+                // 检测到按下Ctrl键
+                var ctrlEvent = new Event('ctrlKeyPressed');
+                document.dispatchEvent(ctrlEvent);
+            }
+        });
+
+        document.addEventListener('ctrlKeyPressed', function() {
+            // 在此处编写Ctrl键按下时要执行的代码
+            console.log("Ctrl键被按下了");
+        });
+
+    function updateTime() {
+        var titleElement = document.getElementById("title");
+        var date = new Date();
+        var currentTime = date.toLocaleTimeString();
+        titleElement.innerHTML = currentTime;
+    }
+
+// 调用updateTime函数，每秒钟更新一次时间
+setInterval(updateTime, 1000);
+  </script>
+</body>
+</html>
