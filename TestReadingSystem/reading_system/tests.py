@@ -499,4 +499,27 @@ def write_dict_to_file(dictionary, filename):
             file.write(json.dumps({key: value}, ensure_ascii=False) + '\n')
 
 
-TestExcel()
+def TestPinyinTable():
+    from reading_system.utils import PinYin
+    pinyin_table = PinYin.PinYinTable()
+    print(pinyin_table.GetVowel("qian"))
+    print(pinyin_table.GetConsonant("qian"))
+    print(pinyin_table.GetConsonant("ang"))
+    from reading_system.utils.chinesecharacter import pyinDict, GetPinyinVec, JudgeBetweenCharacters
+    print(JudgeBetweenCharacters("按", "班"))
+
+
+def TestGetErrorMessage():
+    from reading_system.utils.chinesecharacter import GetErrorMessage
+    tar = "请"
+    res = "晴顷刻"
+    print(GetErrorMessage(tar, res))
+
+
+def TestPinyinVec():
+    from reading_system.utils.chinesecharacter import GetPinyinVec, GetPinyin2
+    print(GetPinyinVec("请"))
+    print(GetPinyin2("呗"))
+
+
+TestPinyinVec()

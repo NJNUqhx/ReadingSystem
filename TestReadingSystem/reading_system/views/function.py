@@ -240,6 +240,64 @@ def download_excel(request, nid=0):
             ws.cell(i + 2, 3).value = exercise_list[i].right
             ws.cell(i + 2, 4).value = exercise_list[i].accuracy
 
+    elif nid == 9:
+        from reading_system.utils import chinesecharacter
+        # 生成所有识别结果的表格
+        ws.append(['目标汉字', '识别结果', '判断结果', '测试时间', '学生账号', '测试类型'])
+        # ws['A1'] = '目标汉字'
+        # ws['B1'] = '识别结果'
+        # ws['C1'] = '判断结果'
+        # ws['D1'] = '测试时间'
+        # ws['E1'] = '学生账号'
+        # ws['F1'] = '测试类型'
+        result = models.WavRecognitionResult.objects.all()
+        row = 2
+        for obj in result:
+            tar = obj.target
+            res = obj.result
+
+            ws.cell(row, 1).value = tar
+            ws.cell(row, 2).value = res
+
+            msg = chinesecharacter.GetErrorMessage(tar, res)
+
+            # if len(tar) == 1:
+            #     ws.cell(row, 6).value = "识别单字"
+            #     rset = chinesecharacter.SplitWavResult(res)
+            #     for elem in rset:
+            #         if len(elem) == 1:
+            #             if chinesecharacter.CompareSingleCharacter(tar, elem):
+            #                 msg = "朗读正确，" + tar + " 与 " + elem + "读音相同"
+            #         elif len(elem) > 1:
+            #             if chinesecharacter.CompareSingleCharacterInSentence(tar, elem):
+            #                 msg = "朗读正确，" + tar + "在词语 " + elem + " 中"
+            # elif len(tar) < 5:
+            #     ws.cell(row, 6).value = "识别词语"
+            #     ans_len = chinesecharacter.LCS(tar, res)
+            #     ans_str = chinesecharacter.LCS_str(tar, res)
+            #     if len(tar) == ans_len:
+            #         msg = "完全正确"
+            #     elif ans_len > 0:
+            #         msg = "部分正确，朗读正确部分: " + ans_str
+            # else:
+            #     ws.cell(row, 6).value = "识别句子"
+            #     ans_len = chinesecharacter.LCS(tar, res)
+            #     ans_str = chinesecharacter.LCS_str(tar, res)
+            #     if len(tar) == ans_len:
+            #         msg = "完全正确"
+            #     elif ans_len > 0:
+            #         msg = "部分正确，朗读正确部分: " + ans_str
+            ws.cell(row, 3).value = msg
+            ws.cell(row, 4).value = obj.exercise_time.__str__()
+            ws.cell(row, 5).value = obj.stu
+            if len(tar) == 1:
+                ws.cell(row, 6).value = "识别单字"
+            elif len(tar) < 5:
+                ws.cell(row, 6).value = "识别词语"
+            else:
+                ws.cell(row, 6).value = "识别句子"
+            row += 1
+
 
     # 准备写入到IO中
     output = BytesIO()
@@ -292,3 +350,6 @@ def upload_excel(request):
 
 def test_voice(request):
     return render(request, "test_voice.html")
+
+def test_fluency(request):
+    return render(request, "test_fluency.html")

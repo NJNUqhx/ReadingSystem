@@ -5,7 +5,7 @@
     <div class="container">
         <div class="jumbotron">
           <h1>设备音频测试</h1>
-          <h2 id="target">目标汉字:</h2>
+          <h2 id="target">目标词语或者语句:</h2>
           <h3 id="state">录制状态: 未录制</h3>
           <h3 id="result">识别结果: 等待系统识别</h3>
           <h3 id="judge">判断结果: 等待系统判断</h3>
@@ -52,21 +52,24 @@
     let target = "字";
     let allowed = true;
     let recording = false;
-
+    let exercises = [
+        '动物',
+        '植物',
+        '颜色',
+        '数字',
+        '事物',
+        '小猫在树上',
+        '大象有长长的鼻子',
+        '花开得很美',
+        '我喜欢吃冰淇淋',
+        '小鸟在天空中飞翔',
+    ];
+    let exercise_idx = 0;
     function GetExercise()
     {
-        $.ajax({
-            url: "/stu/exercise/list/4/",
-            type: "post",
-            success: function (resp){
-                target = resp.character;
-                $("#target").text("目标汉字: " + target);
-                console.log("返回汉字: " + resp.character);
-            },
-            error:function(){
-                console.log("error");
-            }
-        })
+        target = exercises[exercise_idx];
+        exercise_idx = (exercise_idx + 1) % exercises.length;
+        $("#target").text("目标词语或语句: " + target);
     }
 
     function GetWavName()
@@ -88,6 +91,7 @@
                 // 当前处于未录制状态
                 if (recording === false && allowed === true) {
                     GetExercise();
+                    console.log(target);
                     allowed = false;
                     recording = true;
 
@@ -135,7 +139,7 @@
                         xhr.send(fd);
 
                     $.ajax({
-                        url: '/stu/recognition/4/',
+                        url: '/stu/recognition/6/',
                         type: 'post',
                         data: {
                             file_name: wav_name,

@@ -1,0 +1,512 @@
+# 异步进行识别结果 #
+ {% extends 'layout_stu.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <div class="jumbotron area" >
+        <div class = "finsh-area">
+            <button type="button" class="btn btn-danger btn-lg" id="finsh_test" onclick="finshTest()">结束</button>
+        </div>
+
+        <div class="tip-area">
+            <h2 id="tip">语音提示</h2>
+        </div>
+        <div class="exercise-area">
+            <label id="exercise">字</label>
+        </div>
+        <div class="answer-area">
+            <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
+            <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
+
+            <button type="button" class="btn btn-success btn-lg " id="next_exercise">开始</button>
+            <button type="button" class="btn btn-danger btn-lg" id="skip">跳过</button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    *{
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
+    label{
+        font-size: 250px;
+        text-align: center;
+        margin-left: 40%;
+        vertical-align: middle;
+        padding-bottom: 0;
+    }
+    #tip{
+        text-align: center;
+        color: red;
+    }
+    #next_exercise{
+        float: right;
+    }
+    .area{
+        height: 720px;
+    }
+    .answer-area{
+        margin-top: 150px;
+    }
+    .exercise-area{
+
+    }
+
+    #finsh_test{
+        float: right;
+    }
+
+    #skip{
+        float: right;
+    }
+</style>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function(){
+      getExerciseList();
+    })
+
+
+    let isStart = true;
+    let start = new Date();
+    let begin = false;
+
+    let info = {total: 0, wrong: 0};
+
+    {#修改错误上限#}
+    let wrong_limit = 15;
+
+    let score = 0;
+    let literacy = 0.0;
+
+    let all_characters = "";
+    let recognized_characters = "";
+    let wrong_characters = "";
+    let not_recognized_characters = "";
+
+    let cur_time = new Date();
+    let name = "";
+    name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
+    + cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+
+    const file_name = () => {
+        cur_time = new Date();
+        name = cur_time.getFullYear().toString() + cur_time.getMonth().toString() + cur_time.getDay().toString() + cur_time.getHours().toString()
+    + cur_time.getMinutes().toString() + cur_time.getSeconds().toString();
+        return name;
+    };
+
+    let num = [0, 295, 244, 244, 283, 326, 321, 330, 331, 318, 254];
+    let right_level = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let total_level = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    let finsh_test = false;
+
+    function finshTest()
+    {
+        finsh_test = true;
+    }
+
+    {#到达截止时间后跳转#}
+    function checkTime(){
+        if(finsh_test || info.wrong >= wrong_limit || info.total >= 100) {
+           // 上传测试成绩
+            score = info.total - info.wrong;
+            for(let i = 1; i <= 10; i++){
+                if(total_level[i] === 0) continue;
+                let t = right_level[i] / total_level[i] * num[i];
+                literacy += t;
+            }
+
+            $.ajax({
+                url: "/stu/uploadInfo/0/",
+                type: "post",
+                data: {
+                    "total": info.total,
+                    "score": score,
+                    "literacy": literacy,
+                    "wrong": wrong_characters
+                },
+                success(res){
+                    console.log(res);
+                    window.location.href="/stu/testOneResult/"
+                },
+                error(){
+                    console.log("error");
+                }
+            })
+
+        }
+        const t = setTimeout(function () {
+            checkTime()
+        }, 1000);
+    }
+
+    // 计时模块
+    function countTime(){
+
+        const now = new Date();
+        if(isStart)
+        {
+            isStart=false;
+            start=now;
+        }
+        let differ_s = parseInt((now - start) / 1000 % 60);
+        let differ_m = parseInt((now - start) / 1000 / 60);
+        differ_m = checkTimeFormat(differ_m);
+        differ_s = checkTimeFormat(differ_s);
+        document.getElementById('differ_time').innerText = differ_m + ":" + differ_s;
+        t = setTimeout(function(){countTime()},500);
+
+    }
+
+
+
+    // 获取当前已经经历的时间
+    function getTime(){
+        const now = new Date();
+        let differ_s = parseInt((now - start) / 1000 % 60);
+        let differ_m = parseInt((now - start) / 1000 / 60);
+        let m = checkTimeFormat(differ_m);
+        let s = checkTimeFormat(differ_s);
+        return m + ":" + s;
+    }
+
+    function checkTimeFormat(i){
+        if (i<10){
+            i="0" + i;
+        }
+        return i;
+    }
+
+    let exercises = [];
+    let exercise_idx = 0;
+    let queue1_idx = 0;
+    let queue2_idx = 0;
+    let exercise_count = 0;
+    let cur_exercise = {"ch":"字", "level": 0};
+    let pre_exercise = {"ch":"字", "level": 0};
+
+    function getExerciseList(){
+        $.ajax({
+            url: "/stu/exercise/list/0/",
+            type: "post",
+            success: function (resp){
+                exercises = resp.list;
+                console.log(resp.list);
+            },
+            error:function(){
+                console.log("error");
+            }
+        })
+
+    }
+
+
+
+    let recording = false;
+    let wav_name = "";
+
+    // 表示当前汉字的语音信号已被成功录制并发送到后台
+    let goto_next = true;
+
+    // 是否更新到下一个汉字
+    let update = true;
+
+    // 是否是第一次出错
+    let first_wrong = true;
+
+    // 是否是第一次重复朗读
+    let AGAIN_LIMIT = 2;
+    let read_again = 0;
+
+    let IS_SKIP = false;
+
+    // queue1: 音频质量不佳汉字 识别错误汉字
+    // queue2: 朗读错误汉字
+    // countTable: 记录每个汉字出现的次数
+    let queue1 = [];
+    let queue2 = [];
+    let countTable = {};
+
+    function Update(){
+        wav_name = name;
+        name = file_name();
+        // 题目更新为下一个汉字
+
+        // 从三个队列中更新下一个汉字题目
+        // 从音频质量不佳汉字中更新下一个
+        if(exercise_count % 3 === 0 && queue1_idx < queue1.length)
+        {
+            $('#exercise').text(queue1[queue1_idx]['ch']);
+            $('#tip').text("请朗读屏幕上的汉字: " + queue1[queue1_idx]['ch']);
+            pre_exercise = cur_exercise;
+            cur_exercise = queue1[queue1_idx];
+            queue1_idx += 1;
+        }
+        // 从朗读错误汉字中更新下一个
+        else if(exercise_count % 4 ===  0 && queue2_idx < queue2.length)
+        {
+            $('#exercise').text(queue2[queue2_idx]['ch']);
+            $('#tip').text("请朗读屏幕上的汉字并组词: " + queue2[queue2_idx]['ch']);
+            pre_exercise = cur_exercise;
+            cur_exercise = queue2[queue2_idx];
+            queue2_idx += 1;
+        }else{
+            $('#exercise').text(exercises[exercise_idx]['ch']);
+            $('#tip').text("请朗读屏幕上的汉字: " + exercises[exercise_idx]['ch']);
+            pre_exercise = cur_exercise;
+            cur_exercise = exercises[exercise_idx];
+            if (exercise_idx === exercises.length - 1){
+                getExerciseList();
+                exercise_idx = 0;
+            }
+            else {
+                exercise_idx = (exercise_idx + 1) % exercises.length;
+            }
+        }
+
+
+        name = name + cur_exercise['ch'];
+
+    }
+
+    function PrintTotal(){
+        console.log("汉字总数: " + info.total);
+        console.log("错误个数: " + info.wrong);
+        console.log("全部汉字: " + all_characters);
+        console.log("正确汉字: " + recognized_characters);
+        console.log("错误汉字: " + wrong_characters);
+
+        let content = "汉字总数： " + info.total +
+            "\n错误个数：" + info.wrong +
+            "\n全部汉字：" + all_characters +
+            "\n正确汉字：" + recognized_characters +
+            "\n错误汉字：" + wrong_characters;
+
+        alert(content);
+
+    }
+
+
+    if (navigator.mediaDevices.getUserMedia) {
+    const constraints = { audio: true };
+    navigator.mediaDevices.getUserMedia(constraints).then(
+        stream => {
+
+            const mediaRecorder = new MediaRecorder(stream);
+            var chunks = [];
+
+            const recordBtn = document.querySelector("#next_exercise");
+            const skipBtn = document.querySelector("#skip");
+
+            // 点击跳过按钮
+            skipBtn.onclick = () => {
+
+                if(begin === true)
+                {
+                    IS_SKIP = true;
+                    // 获取当前汉字
+                    const tar_character = cur_exercise['ch'];
+                    const tar_level = cur_exercise['level'];
+
+                    // 统计汇总当前错误汉字
+                    read_again = 0;
+                    first_wrong = true;
+
+                    update = true;
+                    info.total++;
+                    info.wrong++;
+                    total_level[tar_level]++;
+                    all_characters = all_characters + tar_character;
+                    wrong_characters = wrong_characters + tar_character;
+
+                    console.log(tar_character + " : 跳过");
+
+                    // 重新录音
+                    mediaRecorder.stop();
+
+                    // 更新题目
+                    Update();
+
+                    chunks = [];
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                    };
+                }
+            }
+
+            // 点击下一题按钮
+            recordBtn.onclick = () => {
+                exercise_count += 1;
+
+                $("#next_exercise").text("朗读结束");
+                $("#skip").text("跳过");
+
+
+                // 第一次点击开始按钮后
+                if(begin === false){
+                    begin = true;
+                    countTime();
+                    checkTime();
+                    // setInterval(PrintTotal, 20 * 1000);
+                }
+
+                // 开始点击时自动录音
+                if (recording === false) {
+                    recording = true;
+                    Update();
+
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+                }
+                // 其余情况录音结束并录音开始
+                else {
+
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        if (IS_SKIP === true)
+                        {
+                            IS_SKIP = false;
+                            return;
+                        }
+                        const tar_character = cur_exercise['ch'];
+                        const tar_level = cur_exercise['level'];
+
+
+                        // 发送音频给后端识别
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+                        var fd = new FormData();
+                        fd.append('wav_name', wav_name);
+                        fd.append('file', blob);
+                        // console.log(blob);
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            var jsonObject;
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                jsonObject = JSON.parse(xhr.responseText);
+                                //处理返回结果
+
+                            }
+                        };
+                        xhr.open('POST', '/speech/save/');
+                        xhr.send(fd);
+
+
+                        // 识别音频并返回结果
+                        $.ajax({
+                        url: '/stu/recognition/0/',
+                        type: 'post',
+                        data: {
+                            file_name: wav_name,
+                            character: tar_character,
+                            level: tar_level
+                        },
+                        success: function(res){
+                            // 1. 音频质量不佳
+                            if(res.again === true)
+                            {
+                                countTable[tar_character] += 1;
+                                // 重复达到指定次数后进入queue2
+                                if(countTable[tar_character] < AGAIN_LIMIT) {
+                                    queue1.push(cur_exercise);
+                                    console.log(tar_character + " : 音频质量不佳");
+                                }else {
+                                    queue2.push(cur_exercise);
+                                    console.log(tar_character + " : 音频质量不佳，判定错误");
+                                }
+
+                            }
+                            // 2. 音频识别错误
+                            else if(res.result === "error")
+                            {
+                                queue1.push(cur_exercise);
+                                console.log(tar_character + " : 音频识别错误");
+                            }
+                            // 3. 音频识别正确，判断识别结果与目标汉字的关系
+                            else if(res.result !== "error")
+                            {
+                                // 朗读正确
+                                if(res.right === true)
+                                {
+                                    console.log(tar_character + " : 回答正确");
+
+                                    info.total++;
+                                    total_level[tar_level]++;
+                                    all_characters = all_characters + tar_character;
+                                    right_level[tar_level]++;
+                                    recognized_characters = recognized_characters + tar_character;
+
+                                }else
+                                {
+                                    // 朗读并组词错误，判定为回答错误
+                                    if(queue2.includes(cur_exercise))
+                                    {
+                                        console.log(tar_character + " : 回答错误");
+
+                                        info.total++;
+                                        info.wrong++;
+                                        total_level[tar_level]++;
+                                        all_characters = all_characters + tar_character;
+                                        wrong_characters = wrong_characters + tar_character;
+                                    }
+                                    // 第一次朗读错误，过会重新组词
+                                    else
+                                    {
+                                        console.log(tar_character + " : 第一次朗读错误");
+                                        queue2.push(cur_exercise);
+                                    }
+                                }
+                            }
+
+
+                            console.log(res);
+
+
+                    },
+                        error: function(){
+                            queue1.push(cur_exercise);
+                            console.log(tar_character + " : 后端传输错误");
+                        }
+                    })
+                        if(exercise_count % 15 === 0)
+                        {
+                            PrintTotal();
+                        }
+
+                        // 继续下一个汉字的录制
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+
+                        // 更新汉字
+                        Update();
+
+                    }
+
+                }
+
+
+            }
+
+            // 通过空格控制进入下一题
+        }
+    )}
+
+    </script>
+{% endblock %}

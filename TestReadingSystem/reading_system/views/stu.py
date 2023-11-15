@@ -336,30 +336,7 @@ def stu_recognizeSpeech(request, nid=0):
             return JsonResponse({"result": res, "success":True})
         else:
             return JsonResponse({"success":False})
-    # 准确性测试模拟测试
-    if nid == 4:
-        if isinstance(res, str) and chinesecharacter.JudgeCharacter(res[0]):
-            tar = receive["target"]
-            msg = ""
-            substr = res[1:]
-            if CompareChar(tar, res[0]):
-                # 第一个字识别正确
-                if JudgePyInSentence(tar, substr):
-                    msg = "回答正确，识别字正确且组词正确"
-                else:
-                    msg = "回答正确，识别字正确但组词错误"
-            else:
-                # 第一个字识别错误
-                if JudgePyInSentence(tar, substr):
-                    if IsSimilarChar(tar, res[0]):
-                        msg = "正确，识别字错误但在允许范围内，组词正确"
-                    else:
-                        msg = "错误，识别字错误但组词正确"
-                else:
-                    msg = "错误，识别字错误且组词错误"
-            return JsonResponse({"result": res, "success":True, "msg": msg})
-        else:
-            return JsonResponse({"success":False})
+
 
     # 存储识别结果
     wav_result = WavRecognitionResult(stu=dic['name'])
@@ -390,7 +367,7 @@ def stu_recognizeSpeech(request, nid=0):
             tar = receive["character"]
             again = False
             # 判断 目标汉字 和 候选集合的关系
-            flag = chinesecharacter.JudgeSingleCharacter(tar,  rset)
+            flag = chinesecharacter.JudgeSingleCharacter(tar, rset)
 
             if not flag:
                 # 存在 error_msg 则重新朗读
@@ -593,6 +570,24 @@ def stu_recognizeSpeech(request, nid=0):
             row_object.save()
 
         return JsonResponse({"result": res, "cnt": cnt, "wrong": wrong, "len": len(tar)})
+    elif nid == 6:
+        # 流畅性模拟测试
+        if isinstance(res, str):
+            tar = receive["target"]
+            right = LCS_str(tar, res)
+            cnt = LCS(tar, res)
+            msg = chinesecharacter.GetErrorMessage(tar, res)
+            return JsonResponse({"result": res, "success": True, "msg": msg})
+        else:
+            return JsonResponse({"success": False})
+    elif nid == 4:
+        # 准确性模拟测试
+        if isinstance(res, str) and chinesecharacter.JudgeCharacter(res[0]):
+            tar = receive["target"]
+            msg = chinesecharacter.GetErrorMessage(tar, res)
+            return JsonResponse({"result": res, "success":True, "msg": msg})
+        else:
+            return JsonResponse({"success":False})
 
 def stu_showList(request, nid=1):
     dic = request.session.get('info')

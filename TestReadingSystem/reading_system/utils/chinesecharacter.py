@@ -431,6 +431,32 @@ def GetDict(chLists):
 pyinDict = GetDict(characterLists)
 
 
+# 获取给定汉字的拼音集合
+def GetPinyinVec(ch):
+    import re
+    if ch in pyinDict:
+        vec = pyinDict[ch]
+        res = []
+        for elem in vec:
+            new_elem = re.sub(r'\d+', '', elem)
+            res.append(new_elem)
+    else:
+        res = GetPinyin2(ch)
+    return res
+
+
+# 判断两个汉字是否在可允许的错误范围内
+def JudgeBetweenCharacters(ch1, ch2):
+    from reading_system.utils.PinYin import pinyinTable
+    vec1 = GetPinyinVec(ch1)
+    vec2 = GetPinyinVec(ch2)
+    for elem1 in vec1:
+        for elem2 in vec2:
+            if pinyinTable.JudgeDifferentSounds(elem1, elem2):
+                return True
+    return False
+
+
 # 获取准确性测试题目
 def GenExerciseList(grade):
     from reading_system.utils.chooseList import gen
@@ -465,7 +491,10 @@ def SplitWavResult(wav_result):
 def CompareSingleCharacter(tar, src):
     if len(src) != 1 or not JudgeCharacter(src):
         return False
-    list1 = pyinDict[tar]
+    if tar in pyinDict:
+        list1 = pyinDict[tar]
+    else:
+        list1 = GetPinyin(tar)
     if src in pyinDict:
         list2 = pyinDict[src]
     else:
@@ -494,7 +523,51 @@ def JudgeSingleCharacter(tar, rset):
         if len(elem) == 1:
             flag = CompareSingleCharacter(tar, elem)
         elif len(elem) > 1:
-            flag = CompareSingleCharacterInSentence(tar, elem)
+            flag = CompareSingleCharacterInSentence(tar, elem) and JudgeBetweenCharacters(tar, elem[0])
         if flag:
             return True
     return False
+
+
+def GetErrorMessage(tar, res):
+    # 获取阅读准确性、阅读流畅性测试错误信息
+    rset = SplitWavResult(res)
+    msg = "error"
+    if len(tar) == 1:
+        # 阅读准确性测试
+        for elem in rset:
+            if len(elem) == 1:
+                # 直接朗读汉字
+                if CompareSingleCharacter(tar, elem):
+                    msg = "朗读正确，" + tar + " 与 " + elem + "读音相同"
+                    return msg
+                else:
+                    msg = "朗读错误，" + tar + " 与 " + elem + "读音不同"
+            elif len(elem) > 1:
+                # 朗读该字并组词
+                if JudgeCharacter(elem[0]):
+                    if CompareSingleCharacter(tar, elem[0]):
+                        msg = "朗读正确，" + tar + " 与 " + elem[0] + "读音相同"
+                        return msg
+                    if JudgeBetweenCharacters(tar, elem[0]):
+                        # 查看第一个字是否在允许范围内
+                        if CompareSingleCharacterInSentence(tar, elem[1:]):
+                            msg = "朗读正确，" + tar + " 在词语 " + elem[1:] + " 中"
+                            return msg
+                        else:
+                            msg = "朗读错误，" + tar + " 不在词语 " + elem[1:] + " 中"
+                    else:
+                        msg = "朗读错误，" + tar + " 与 " + elem[0] + " 超过允许的错误范围"
+                else:
+                    msg = "识别错误，" + elem[0] + " 不是汉字"
+    else:
+        # 阅读流畅性测试
+        lcs_len = LCS(tar, res)
+        lcs_str = LCS_str(tar, res)
+        if lcs_len == 0:
+            msg = "朗读完全错误"
+        elif lcs_len == len(tar):
+            msg = "朗读完全正确"
+        else:
+            msg = "朗读部分正确，正确部分：" + lcs_str
+    return msg

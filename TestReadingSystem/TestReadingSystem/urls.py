@@ -87,6 +87,7 @@ urlpatterns = [
     # 模拟测试
     path('test/voice/', function.test_voice),
     path('test/correct/', stu.stu_testCorrect),
+    path('test/fluency/', function.test_fluency),
 
     # 汉字属性检索
     path('search/', search.SearchHome),
