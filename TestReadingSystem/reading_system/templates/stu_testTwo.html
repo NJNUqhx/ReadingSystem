@@ -269,6 +269,107 @@
 
                 }
             }
+
+            // 空格控制
+            document.addEventListener("keydown", function(event) {
+              if (event.key === " " || event.keyCode === 32) {
+                // 空格键被按下
+                event.preventDefault(); // 阻止默认的空格键行为（如滚动页面）
+                handleSpacebarPress();
+              }
+            });
+
+            function handleSpacebarPress() {
+
+                if(begin === false){
+                    begin = true;
+                    countTime();
+                    checkTime();
+                }
+
+                wav_name = name;
+                name = file_name();
+
+                {# 更新题目 #}
+                {#pre_exercise = cur_exercise;#}
+                {#cur_exercise = "";#}
+                {#for (let i = group * 8; i < group * 8 + 8; i++) {#}
+                {#    cur_exercise = cur_exercise.concat(exercises[i]);#}
+                {#group = group + 1;#}
+
+                pre_exercise = cur_exercise;
+                cur_exercise = exercises[idx];
+                idx ++;
+                if(idx === exercises.length){
+                    checkTime();
+                }
+
+                $('#exercise').text(cur_exercise["phrase"]);
+                name = name + cur_exercise["phrase"];
+
+                if (recording === false) {
+                    recording = true;
+                    mediaRecorder.start();
+                    mediaRecorder.ondataavailable = function (e) {
+                        chunks.push(e.data);
+                    };
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.onstop = e => {
+                        var blob = new Blob(chunks, {type: "audio/mpeg;"});
+                        chunks = [];
+                        var audioURL = window.URL.createObjectURL(blob);
+
+                        var fd = new FormData();
+                        fd.append('wav_name', wav_name);
+                        fd.append('file', blob);
+                        console.log(blob);
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function () {
+                            var jsonObject;
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                jsonObject = JSON.parse(xhr.responseText);
+                                //处理返回结果
+
+                            }
+                        };
+                        xhr.open('POST', '/speech/save/');
+                        xhr.send(fd);
+
+                        mediaRecorder.start();
+                        mediaRecorder.ondataavailable = function (e) {
+                            chunks.push(e.data);
+                        };
+                    info.time = getSeconds();
+
+                    $.ajax({
+                        url: '/stu/recognition/5/',
+                        type: 'post',
+                        data: {
+                            file_name: wav_name,
+                            character: pre_exercise["phrase"]
+                        },
+                        success: function(res){
+                            if(res.result !== "error")
+                            {
+                                info.total += pre_exercise["len"];
+                                info.right += res.cnt;
+                                info.wrong += res.wrong;
+                                console.log(res);
+                                console.log(info);
+                            }else{
+                                alert("音频识别错误");
+                            }
+
+                    },
+                        error : function(){
+
+                        }
+                    })
+                    }
+
+                }
+            }
         }
     )}
 

@@ -26,7 +26,7 @@ class PinYinTable:
             return None
 
     def JudgeDifferentSounds(self, sound1, sound2):
-        if self.GetConsonant(sound1) == self.GetConsonant(sound1):
+        if self.GetConsonant(sound1) == self.GetConsonant(sound2):
             return True
         if self.GetVowel(sound1) == self.GetVowel(sound2):
             return True

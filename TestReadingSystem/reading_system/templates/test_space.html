@@ -11,11 +11,9 @@
 
 <script>
     console.log("控制台输出");
-    arr = [{"ch":"a", "level":9},{"ch":"b", "level":9},{"ch":"c", "level":9},{"ch":"d", "level":9},]
-    elem1 = {"ch":"a", "level":9};
-    elem2 = {"ch":"e", "level":9};
-    console.log(CheckElemInArr(arr, elem1));
-    console.log(CheckElemInArr(arr, elem2));
+    arr = [{"ch":"a", "level":9},{"ch":"b", "level":8},{"ch":"c", "level":9},{"ch":"d", "level":9},]
+    arr2 = [{"ch":"a", "level":9},{"ch":"b", "level":9},{"ch":"g", "level":9},{"ch":"h", "level":9},]
+
 
     function CheckElemInArr(arr, tar){
         for(var elem of arr){
@@ -24,6 +22,41 @@
         return false;
     }
 
+    function ConcactDictArrs(arr1, arr2) {
+        // 将arr2中每个不重复的元素加入到arr1中
+        for (const elem of arr2) {
+            if (CheckElemInArr(arr1, elem)) continue;
+            arr1.push(elem);
+        }
+    }
+
+    console.log("替换前");
+    console.log(arr);
+    console.log(arr2);
+    console.log(ReplaceSameLevelChar(arr, arr2, 0, 11));
+    console.log("替换后");
+    console.log(arr);
+    console.log(arr2);
+
+    function ReplaceSameLevelChar(arr1, arr2, tar_idx, tar_level){
+        // 从数组 arr1 的 tar_idx 位置开始，向 arr2 中添加与 tar 相同等级的汉字
+        let idx = -1;
+        for (let i = tar_idx; i < arr1.length; i++) {
+            if (arr1[i]["level"] === tar_level){
+                idx = i;
+                break;
+            }
+        }
+        if(idx !== -1)
+        {
+            arr2.push(arr1[idx]);
+            arr1.splice(idx, 1);
+            return true;
+        }else
+        {
+            return false;
+        }
+    }
 
 </script>
 </html>

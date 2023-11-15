@@ -20,7 +20,7 @@
             <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
 
             <button type="button" class="btn btn-success btn-lg " id="next_exercise">开始</button>
-            <button type="button" class="btn btn-danger btn-lg" id="skip">跳过</button>
+            <button type="button" class="btn btn-danger btn-lg" id="skip" style="display:none;">跳过</button>
         </div>
 
     </div>
@@ -196,13 +196,22 @@
     let cur_exercise = {"ch":"字", "level": 0};
     let pre_exercise = {"ch":"字", "level": 0};
 
+    function ConcatDictArray(arr1, arr2) {
+        // 将arr2中每个不重复的元素加入到arr1中
+        for (const elem of arr2) {
+            if (CheckElemInArr(arr1, elem)) continue;
+            arr1.push(elem);
+        }
+    }
+
     function getExerciseList(){
         $.ajax({
             url: "/stu/exercise/list/0/",
             type: "post",
             success: function (resp){
-                exercises = resp.list;
-                // console.log(resp.list);
+                const new_exercises = resp.list;
+                ConcatDictArray(exercises, new_exercises);
+
             },
             error:function(){
                 console.log("error");
@@ -266,18 +275,36 @@
             $('#tip').text("请朗读屏幕上的汉字: " + exercises[exercise_idx]['ch']);
             pre_exercise = cur_exercise;
             cur_exercise = exercises[exercise_idx];
-            if (exercise_idx === exercises.length - 1){
+            exercise_idx += 1;
+            if (exercise_idx > exercises.length - 10)
+            {
                 getExerciseList();
-                exercise_idx = 0;
-            }
-            else {
-                exercise_idx = (exercise_idx + 1) % exercises.length;
             }
         }
 
 
         name = name + cur_exercise['ch'];
         
+    }
+
+    function ReplaceSameLevelChar(arr1, arr2, tar_idx, tar_level){
+        // 从数组 arr1 的 tar_idx 位置开始，向 arr2 中添加与 tar 相同等级的汉字
+        let idx = -1;
+        for (let i = tar_idx; i < arr1.length; i++) {
+            if (arr1[i]["level"] === tar_level){
+                idx = i;
+                break;
+            }
+        }
+        if(idx !== -1)
+        {
+            arr2.push(arr1[idx]);
+            arr1.splice(idx, 1);
+            return true;
+        }else
+        {
+            return false;
+        }
     }
 
     function PrintTotal(){
@@ -432,19 +459,26 @@
 
                                 var tar_exercise = {"ch": tar_character, "level": tar_level};
 
-                                // 1. 音频质量不佳
-                                if(res.again === true)
-                                {
-                                    countTable[tar_character] += 1;
-                                    // 重复达到指定次数后进入queue2
-                                    if(countTable[tar_character] < AGAIN_LIMIT) {
-                                        queue1.push(tar_exercise);
-                                        console.log(tar_character + " : 音频质量不佳");
-                                    }else {
-                                        queue2.push(tar_exercise);
-                                        console.log(tar_character + " : 音频质量不佳，判定错误");
-                                    }
+                                // 0. 特殊情况：识别汉字在不可容忍的错误范围内
+                                if(res.tolerable === false){
+                                    console.log(tar_character + " : 超出允许错误范围");
 
+                                    info.total++;
+                                    info.wrong++;
+                                    total_level[tar_level]++;
+                                    all_characters = all_characters + tar_character;
+                                    wrong_characters = wrong_characters + tar_character;
+                                }
+                                // 1. 音频质量不佳 且 不是空音频
+                                else if(res.again === true && res.result !== "err_msgerr_nosn;")
+                                {
+                                    console.log(tar_character + " : 音频质量不佳");
+                                    // 用相同难度汉字进行替换
+                                    while (!ReplaceSameLevelChar(exercises, queue1, exercise_idx + 1, tar_level))
+                                    {
+                                        getExerciseList();
+                                    }
+                                    console.log("替换汉字：" + queue1[queue1.length - 1]["ch"]);
                                 }
                                 // 2. 音频识别错误
                                 else if(res.result === "error")
@@ -466,6 +500,16 @@
                                         right_level[tar_level]++;
                                         recognized_characters = recognized_characters + tar_character;
 
+                                    }else if(res.result === "err_msgerr_nosn;")
+                                    {
+
+                                        console.log(tar_character + " : 跳过，回答错误");
+
+                                        info.total++;
+                                        info.wrong++;
+                                        total_level[tar_level]++;
+                                        all_characters = all_characters + tar_character;
+                                        wrong_characters = wrong_characters + tar_character;
                                     }else
                                     {
                                         // 朗读并组词错误，判定为回答错误
@@ -518,48 +562,17 @@
                     }
                 }
 
-            // 通过Ctrl跳过当前题目
-            document.addEventListener('keydown', function(event) {
-                if (event.ctrlKey) {
-
-                if(begin === true)
-                {
-                    IS_SKIP = true;
-                    // 获取当前汉字
-                    const tar_character = cur_exercise['ch'];
-                    const tar_level = cur_exercise['level'];
-
-                    // 统计汇总当前错误汉字
-                    read_again = 0;
-                    first_wrong = true;
-
-                    update = true;
-                    info.total++;
-                    info.wrong++;
-                    total_level[tar_level]++;
-                    all_characters = all_characters + tar_character;
-                    wrong_characters = wrong_characters + tar_character;
-
-                    console.log(tar_character + " : 跳过");
-
-                    // 重新录音
-                    mediaRecorder.stop();
-
-                    // 更新题目
-                    Update();
-
-                    chunks = [];
-                    mediaRecorder.start();
-                    mediaRecorder.ondataavailable = function (e) {
-                            chunks.push(e.data);
-                    };
-                }
-            }
-              });
 
             // 通过空格控制进入下一题
-            document.addEventListener('keydown', function(event) {
-                if (event.keyCode === 32) {
+            document.addEventListener("keydown", function(event) {
+              if (event.key === " " || event.keyCode === 32) {
+                // 空格键被按下
+                event.preventDefault(); // 阻止默认的空格键行为（如滚动页面）
+                handleSpacebarPress();
+              }
+            });
+
+            function handleSpacebarPress() {
                     exercise_count += 1;
 
                     $("#next_exercise").text("朗读结束");
@@ -633,19 +646,26 @@
 
                                 var tar_exercise = {"ch": tar_character, "level": tar_level};
 
-                                // 1. 音频质量不佳
-                                if(res.again === true)
-                                {
-                                    countTable[tar_character] += 1;
-                                    // 重复达到指定次数后进入queue2
-                                    if(countTable[tar_character] < AGAIN_LIMIT) {
-                                        queue1.push(tar_exercise);
-                                        console.log(tar_character + " : 音频质量不佳");
-                                    }else {
-                                        queue2.push(tar_exercise);
-                                        console.log(tar_character + " : 音频质量不佳，判定错误");
-                                    }
+                                // 0. 特殊情况：识别汉字在不可容忍的错误范围内
+                                if(res.tolerable === false){
+                                    console.log(tar_character + " : 超出允许错误范围");
 
+                                    info.total++;
+                                    info.wrong++;
+                                    total_level[tar_level]++;
+                                    all_characters = all_characters + tar_character;
+                                    wrong_characters = wrong_characters + tar_character;
+                                }
+                                // 1. 音频质量不佳 且 不是空音频
+                                else if(res.again === true && res.result !== "err_msgerr_nosn;")
+                                {
+                                    console.log(tar_character + " : 音频质量不佳");
+                                    // 用相同难度汉字进行替换
+                                    while (!ReplaceSameLevelChar(exercises, queue1, exercise_idx + 1, tar_level))
+                                    {
+                                        getExerciseList();
+                                    }
+                                    console.log("替换汉字：" + queue1[queue1.length - 1]["ch"]);
                                 }
                                 // 2. 音频识别错误
                                 else if(res.result === "error")
@@ -667,6 +687,16 @@
                                         right_level[tar_level]++;
                                         recognized_characters = recognized_characters + tar_character;
 
+                                    }else if(res.result === "err_msgerr_nosn;")
+                                    {
+
+                                        console.log(tar_character + " : 跳过，回答错误");
+
+                                        info.total++;
+                                        info.wrong++;
+                                        total_level[tar_level]++;
+                                        all_characters = all_characters + tar_character;
+                                        wrong_characters = wrong_characters + tar_character;
                                     }else
                                     {
                                         // 朗读并组词错误，判定为回答错误
@@ -695,6 +725,7 @@
 
                         },
                             error: function(){
+                                var tar_exercise = {"ch": tar_character, "level": tar_level};
                                 queue1.push(tar_exercise);
                                 console.log(tar_character + " : 后端传输错误");
                             }
@@ -717,7 +748,6 @@
 
                     }
                 }
-            });
 
 
         }

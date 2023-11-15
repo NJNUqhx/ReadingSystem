@@ -529,6 +529,24 @@ def JudgeSingleCharacter(tar, rset):
     return False
 
 
+def JudgeSingleCharacterIsTolerable(tar, rset):
+    # 查看汉字是否是允许范围内的错误
+    # 只针对所有识别结果全是汉字的情况
+    new_set = []
+    for elem in rset:
+        if len(elem) == 1 and JudgeCharacter(elem):
+            new_set.append(elem)
+    # 未识别出汉字
+    if len(new_set) == 0:
+        return True
+    else:
+        for elem in new_set:
+            if JudgeBetweenCharacters(tar, elem):
+                print(tar,elem,"相似")
+                return True
+        return False
+
+
 def GetErrorMessage(tar, res):
     # 获取阅读准确性、阅读流畅性测试错误信息
     rset = SplitWavResult(res)
@@ -538,11 +556,16 @@ def GetErrorMessage(tar, res):
         for elem in rset:
             if len(elem) == 1:
                 # 直接朗读汉字
+                # 1. 音节完全相同
                 if CompareSingleCharacter(tar, elem):
                     msg = "朗读正确，" + tar + " 与 " + elem + "读音相同"
                     return msg
+                # 2. 音节相似
+                elif JudgeBetweenCharacters(tar, elem):
+                    msg = "朗读错误，" + tar + " 与 " + elem + "读音相似"
+                # 3. 音节错误
                 else:
-                    msg = "朗读错误，" + tar + " 与 " + elem + "读音不同"
+                    msg = "朗读错误，" + tar + " 与 " + elem + "读音差距较大"
             elif len(elem) > 1:
                 # 朗读该字并组词
                 if JudgeCharacter(elem[0]):

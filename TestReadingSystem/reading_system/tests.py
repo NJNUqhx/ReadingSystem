@@ -518,8 +518,26 @@ def TestGetErrorMessage():
 
 def TestPinyinVec():
     from reading_system.utils.chinesecharacter import GetPinyinVec, GetPinyin2
-    print(GetPinyinVec("请"))
-    print(GetPinyin2("呗"))
+    print(GetPinyinVec("世"))
+    print(GetPinyinVec("界"))
 
 
-TestPinyinVec()
+def TestJudgeSingleCharacterIsTolerable():
+    from reading_system.utils.chinesecharacter import JudgeSingleCharacterIsTolerable
+    tar = "是"
+    rset = ["error", "alkdsa", "界", "田"]
+    print(JudgeSingleCharacterIsTolerable(tar, rset))
+    # from reading_system.utils.chinesecharacter import GetPinyinVec, GetPinyin2
+    # print(GetPinyinVec("世"))
+    # print(GetPinyinVec("界"))
+    # from reading_system.utils.PinYin import pinyinTable
+    # print(pinyinTable.JudgeDifferentSounds("shi", "jie"))
+    # c1 = pinyinTable.GetConsonant("shi")
+    # c2 = pinyinTable.GetConsonant("jie")
+    # print(c1, c2, c1 == c2)
+    # v1 = pinyinTable.GetVowel("shi")
+    # v2 = pinyinTable.GetVowel("jie")
+    # print(v1, v2, v1 == v2)
+
+
+TestJudgeSingleCharacterIsTolerable()

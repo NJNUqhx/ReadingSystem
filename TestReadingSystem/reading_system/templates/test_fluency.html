@@ -147,6 +147,7 @@
                             character: target
                         },
                         success: function(res){
+                            console.log(res);
                             if(res.success === true){
                                 $("#result").text("识别成功: " + res.result);
                                 $("#judge").text("判断结果: " + res.msg);
@@ -155,7 +156,11 @@
                                 console.log("识别结果: " + res.result);
                                 allowed = true;
                             }else{
-                                $("#result").text("识别失败");
+                                $("#result").text("识别失败：" + res.result);
+                                $("#judge").text("判断结果: " + res.msg);
+                                $("#record").text("识别结束");
+                                console.log("识别结果: " + res.result);
+                                allowed = true;
                             }
                         }
                     })
