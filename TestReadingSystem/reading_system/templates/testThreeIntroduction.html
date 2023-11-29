@@ -4,8 +4,24 @@
     <div class="container">
         <div class="jumbotron" >
             <h1 style="text-align: center">阅读流畅性测试二</h1>
-            <h3 style="text-align: left;margin-top: 10%;line-height: 2em;">&emsp;&emsp;<b>测试要求</b>：出声朗读下面的句子，你要读的又快又准。<b>读完后</b>，立刻判断句子的内容是正确的还是错误的，如果正确，点击<b>正确按钮</b>；如果错误，点击<b>错误按钮</b>。只给3分钟时间。准备好后，点击下方按钮进入测试。</h3>
-            <a type="button" class="btn btn-success btn-lg" href="/stu/testThree/" style="margin-top: 15%;margin-left: 40%;">点击开始测试</a>
+            <h3 style="text-align: left;margin-top: 10%;line-height: 3em; margin-bottom: 10%">&emsp;&emsp;<b>测试要求</b>：出声朗读下面的句子，你要读的又快又准。<b>读完后</b>，立刻判断句子的内容是正确的还是错误的，如果正确，点击<b>F</b>按键；如果错误，点击<b>J</b>按键。只给3分钟时间。准备好后，点击<b>空格</b>进入测试。</h3>
+{#            <a type="button" class="btn btn-success btn-lg" href="/stu/testThree/" style="margin-top: 15%;margin-left: 40%;">点击开始测试</a>#}
         </div>
     </div>
+{% endblock %}
+
+{% block js %}
+<script>
+    document.addEventListener("keydown", function(event) {
+          if (event.key === " " || event.keyCode === 32) {
+            // 空格键被按下
+            event.preventDefault(); // 阻止默认的空格键行为（如滚动页面）
+            handleSpacebarPress();
+          }
+        });
+
+        function handleSpacebarPress() {
+          window.location.href = "/stu/testThree/";
+        }
+</script>
 {% endblock %}

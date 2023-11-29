@@ -18,6 +18,12 @@ class StuExactInfo(models.Model):
     account = models.CharField(verbose_name="账号", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32)
 
+    gender_choices = (
+        (1, "男"),
+        (2, "女"),
+    )
+    gender = models.SmallIntegerField(verbose_name="性别", null=True, default=1, choices=gender_choices)
+
     admintec = models.ForeignKey(verbose_name="管理员", null=True, to="TecInfo", to_field="id",
                                  on_delete=models.CASCADE)
 

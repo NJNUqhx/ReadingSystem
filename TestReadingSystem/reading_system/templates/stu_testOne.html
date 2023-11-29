@@ -10,7 +10,7 @@
         </div>
 
         <div class="tip-area">
-            <h2 id="tip">语音提示</h2>
+            <h2 id="tip">点击"空格"按键开始测试</h2>
         </div>
         <div class="exercise-area">
             <label id="exercise">字</label>
@@ -19,7 +19,7 @@
             <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
             <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
 
-            <button type="button" class="btn btn-success btn-lg " id="next_exercise">开始</button>
+            <button type="button" class="btn btn-success btn-lg " id="next_exercise" style="display:none;">开始</button>
             <button type="button" class="btn btn-danger btn-lg" id="skip" style="display:none;">跳过</button>
         </div>
 
@@ -252,11 +252,14 @@
         name = file_name();
         // 题目更新为下一个汉字
 
+        const tip = document.querySelector("#tip");
+
         // 从三个队列中更新下一个汉字题目
         // 从音频质量不佳汉字中更新下一个
         if(queue1_idx < queue1.length)
         {
             $('#exercise').text(queue1[queue1_idx]['ch']);
+            tip.style.color = 'blue';
             $('#tip').text("请朗读屏幕上的汉字(注意音频质量): " + queue1[queue1_idx]['ch']);
             pre_exercise = cur_exercise;
             cur_exercise = queue1[queue1_idx];
@@ -267,12 +270,14 @@
         {
             $('#exercise').text(queue2[queue2_idx]['ch']);
             $('#tip').text("请朗读屏幕上的汉字并组词: " + queue2[queue2_idx]['ch']);
+            tip.style.color = 'blue';
             pre_exercise = cur_exercise;
             cur_exercise = queue2[queue2_idx];
             queue2_idx += 1;
         }else{
             $('#exercise').text(exercises[exercise_idx]['ch']);
-            $('#tip').text("请朗读屏幕上的汉字: " + exercises[exercise_idx]['ch']);
+            $('#tip').text("");
+            tip.style.color = 'black';
             pre_exercise = cur_exercise;
             cur_exercise = exercises[exercise_idx];
             exercise_idx += 1;

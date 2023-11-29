@@ -8,13 +8,16 @@
         <div class = "finsh-area">
             <button type="button" class="btn btn-danger btn-lg" id="finsh_test" onclick="finshTest()">结束</button>
         </div>
+        <div class="tip-area">
+            <h2 id="tip">点击"空格"按键开始测试</h2>
+        </div>
         <div id="exercise-area">
             <label id="exercise">词语</label>
         </div>
         <div class="answer-area">
             <button type="button" class="btn btn-primary btn-lg " onclick="countTime()"> 时间 </button>
             <button type="button" class="btn btn-info btn-lg" id="differ_time">00:00</button>
-            <button type="button" class="btn btn-success btn-lg " id="next_exercise">下一组</button>
+            <button type="button" class="btn btn-success btn-lg " id="next_exercise" style="display: none">下一组</button>
         </div>
     </div>
 </div>
@@ -35,6 +38,10 @@
         vertical-align: middle;
         padding-bottom: 0;
     }
+    #tip{
+        text-align: center;
+        color: red;
+    }
     #next_exercise{
         float: right;
     }
@@ -42,7 +49,7 @@
         height: 720px;
     }
     .answer-area{
-        margin-top: 200px;
+        margin-top: 100px;
     }
     #finsh_test{
         float: right;
@@ -281,10 +288,13 @@
 
             function handleSpacebarPress() {
 
+                $('#tip').text("");
+
                 if(begin === false){
                     begin = true;
                     countTime();
                     checkTime();
+
                 }
 
                 wav_name = name;

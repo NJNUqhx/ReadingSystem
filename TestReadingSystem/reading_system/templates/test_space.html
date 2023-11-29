@@ -5,12 +5,55 @@
     <title>My First HTML Page</title>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <h1 id="title">Hello, World!</h1>
     <p>This is my first HTML page.</p>
 </body>
 
 <script>
-    console.log("控制台输出");
+
+    let Colors = ["red", "blue", "green", "black"];
+    let idx = 0;
+
+    function ChangeTitleColor()
+    {
+        const title = document.querySelector("#title");
+        title.style.color = Colors[idx];
+        idx = (idx + 1) % Colors.length;
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === " " || event.keyCode === 32) {
+        // 空格键被按下
+        event.preventDefault(); // 阻止默认的空格键行为（如滚动页面）
+        handleSpacebarPress();
+      }
+    });
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "f" || event.key === "F") {
+        handleFKey();
+      } else if (event.key === "j" || event.key === "J") {
+        handleJKey();
+      }
+    });
+
+    function handleFKey() {
+      console.log("F key pressed!");
+      // 在这里执行您想要的操作
+    }
+
+    function handleJKey() {
+      console.log("J key pressed!");
+      // 在这里执行您想要的操作
+    }
+
+    function handleSpacebarPress() {
+      ChangeTitleColor();
+    }
+
+
+    function test(){
+        console.log("控制台输出");
     arr = [{"ch":"a", "level":9},{"ch":"b", "level":8},{"ch":"c", "level":9},{"ch":"d", "level":9},]
     arr2 = [{"ch":"a", "level":9},{"ch":"b", "level":9},{"ch":"g", "level":9},{"ch":"h", "level":9},]
 
@@ -21,6 +64,8 @@
         }
         return false;
     }
+
+
 
     function ConcactDictArrs(arr1, arr2) {
         // 将arr2中每个不重复的元素加入到arr1中
@@ -56,6 +101,7 @@
         {
             return false;
         }
+    }
     }
 
 </script>
