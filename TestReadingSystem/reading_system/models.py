@@ -159,6 +159,19 @@ class ExerciseV3Result(models.Model):
     test_time = models.IntegerField(verbose_name="测试用时", default=0)
 
 
+#  提供给五六年级的测试结果统计
+class ExerciseV4Result(models.Model):
+    stu_account = models.CharField(verbose_name="账号", max_length=32)
+    name = models.CharField(verbose_name="姓名", max_length=8, default="测试用户")
+    grade = models.SmallIntegerField(verbose_name="年级", null=True, default=5)
+    total_num = models.IntegerField(verbose_name="总字数", default=0)
+    right_num = models.IntegerField(verbose_name="正确汉字个数", default=0)
+    wrong_num = models.IntegerField(verbose_name="错误汉字个数", default=0)
+    wrong_characters = models.CharField(verbose_name="错误汉字", max_length=256)
+    accuracy_rate = models.DecimalField(verbose_name="正确率", default=0, decimal_places=2, max_digits=3)
+    exercise_time = models.DateTimeField(verbose_name="时间", default=timezone.now, null=False)
+
+
 class Character(models.Model):
     character = models.CharField(verbose_name="汉字", max_length=1, primary_key=True)
     total_time = models.IntegerField(verbose_name="总次数")
@@ -180,4 +193,5 @@ class WavRecognitionResult(models.Model):
     path = models.CharField(verbose_name="音频路径", max_length=64)
     target = models.CharField(verbose_name="识别目标", max_length=32)
     result = models.CharField(verbose_name="识别结果", max_length=256)
+    errmsg = models.CharField(verbose_name="错误信息", max_length=256, default="无")
     exercise_time = models.DateTimeField(verbose_name="时间", default=timezone.now, null=False)

@@ -540,4 +540,14 @@ def TestJudgeSingleCharacterIsTolerable():
     # print(v1, v2, v1 == v2)
 
 
-TestJudgeSingleCharacterIsTolerable()
+def TestGetExerciseBank():
+    from reading_system.utils.chinesecharacter import GetExerciseBank
+    list5 = GetExerciseBank(5)
+    list6 = GetExerciseBank(6)
+    print("五年级", list5)
+    print("六年级", list6)
+    print("五年级", len(list5))
+    print("六年级", len(list6))
+
+
+TestGetExerciseBank()

@@ -27,6 +27,7 @@
                 <th>测试学生</th>
                 <th>识别目标</th>
                 <th>识别结果</th>
+                <th>错误信息</th>
                 <th>测试时间</th>
 
               </tr>
@@ -37,6 +38,7 @@
                 <th>{{ obj.stu }}</th>
                 <th>{{ obj.target }}</th>
                 <th>{{ obj.result }}</th>
+                <th>{{ obj.errmsg }}</th>
                 <th>{{ obj.exercise_time|date:"Y-m-d H:i" }}</th>
               </tr>
             {% endfor %}

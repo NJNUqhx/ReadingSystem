@@ -14,6 +14,7 @@ from reading_system.utils.Voice import voice
 from reading_system.models import ExerciseV1Result
 from reading_system.models import ExerciseV2Result
 from reading_system.models import ExerciseV3Result
+from reading_system.models import ExerciseV4Result
 from reading_system.models import Character
 from reading_system.models import WavRecognitionResult
 from reading_system.models import CharacterOfGrade
@@ -125,14 +126,30 @@ def stu_testThreeResult(request):
     }
     return render(request, "stu_testThreeResult.html", context)
 
+def stu_testFourResult(request):
+    dic = request.session.get('info')
+    row_object = models.ExerciseV4Result.objects.filter(stu_account=dic["account"]).last()
+    score = row_object.right_num
+    total_num = row_object.total_num
+    wrong_num = row_object.wrong_num
+    wrong_characters = row_object.wrong_characters
+    extra = ""
+    context = {
+        "score": score,
+        "total_num": total_num,
+        "wrong_num": wrong_num,
+        "wrong_characters": wrong_characters,
+        "extra": extra
+    }
+    return render(request, "stu_testFourResult.html", context)
 
-# 获取对应年级的题目
 
 # 获取题目
 def stu_testThree(request):
-    exercise = "exerciseList[0]"
-    return render(request, "stu_testThree.html", {"exercise": exercise})
+    return render(request, "stu_testThree.html")
 
+def stu_testFour(request):
+    return render(request, "stu_testFour.html")
 
 
 def stu_testOneIntroduction(request):
@@ -199,6 +216,17 @@ def stu_uploadInfo(request, nid=0):
         result_v3.score = float(result_v3.total_characters - result_v3.wrong_characters) * 60 / float(result_v3.test_time)
         result_v3.avg_speed = float(result_v3.total_characters - result_v3.wrong_characters) * 60 / float(result_v3.test_time)
         result_v3.save()
+        return JsonResponse({"status": "success"})
+    elif nid == 4:
+        # 临时提供给五六年级测试汉字的统计结果
+        result_v4 = ExerciseV4Result(stu_account=dic["account"],name=name,grade=grade)
+        result_v4.total_num = int(receive["total_num"])
+        result_v4.right_num = int(receive["right_num"])
+        result_v4.wrong_num = int(receive["wrong_num"])
+        result_v4.wrong_characters = receive["wrong_characters"]
+        if result_v4.total_num != 0:
+            result_v4.accuracy_rate = float(result_v4.right_num) / result_v4.total_num
+        result_v4.save()
         return JsonResponse({"status": "success"})
 
 
@@ -300,6 +328,15 @@ def get_exercise_list(request, nid=0):
                 list.append(ch[0])
         random.shuffle(list)
         return JsonResponse({"character": list[0]})
+    elif nid == 5:
+        # 根据年级获取临时题库
+        grade = request.session.get('info')['grade']
+        if 5 <= grade <= 6:
+            exercise_list = chinesecharacter.GetExerciseBank(grade)
+            return JsonResponse({"success": True, "list": exercise_list})
+        else:
+            return JsonResponse({"success": False})
+
 
 
 from datetime import datetime
@@ -346,14 +383,13 @@ def stu_recognizeSpeech(request, nid=0):
 
     # 讯飞语音识别并存储识别结果
     rset = []
-    if nid == 0 or nid == 2 or nid == 5 or nid == 4 or nid == 6:
+    if nid == 0 or nid == 2 or nid == 5 or nid == 4 or nid == 6 or nid == 7:
         rset = ifly_recognize.recognize(recognize_path)
         for elem in rset:
             wav_result.result += ";" + elem
         rset.append(res)
         res = wav_result.result
 
-    wav_result.save()
 
     grade = int(dic['grade'])
 
@@ -364,6 +400,10 @@ def stu_recognizeSpeech(request, nid=0):
         if isinstance(res, str):
             tar = receive["character"]
             again = False
+
+            wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+            wav_result.save()
+
             # 判断 目标汉字 和 候选集合的关系
             flag = chinesecharacter.JudgeSingleCharacter(tar, rset)
 
@@ -418,6 +458,9 @@ def stu_recognizeSpeech(request, nid=0):
             return JsonResponse({"result": "error"})
         tar = receive["character"]
 
+        wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+        wav_result.save()
+
         right = gen.compareSentenceRight(res, tar)
         cnt = gen.compareSentence(res, tar)
 
@@ -447,6 +490,9 @@ def stu_recognizeSpeech(request, nid=0):
             return JsonResponse({"result": "error"})
         tar = receive["character"]
         flag = receive["judge"]
+
+        wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+        wav_result.save()
 
         # 保存问题回答结果
         # 所有年级统计结果
@@ -507,6 +553,9 @@ def stu_recognizeSpeech(request, nid=0):
         cnt = LCS(tar, res)
         wrong = ""
         phrase = receive["character"]
+
+        wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+        wav_result.save()
 
         ## 统计词语中读错的字
         for ch in tar:
@@ -578,6 +627,8 @@ def stu_recognizeSpeech(request, nid=0):
         # 流畅性模拟测试
         if isinstance(res, str) and chinesecharacter.JudgeCharacter(res[0]):
             tar = receive["target"]
+            wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+            wav_result.save()
             right = LCS_str(tar, res)
             cnt = LCS(tar, res)
             msg = chinesecharacter.GetErrorMessage(tar, res)
@@ -588,10 +639,55 @@ def stu_recognizeSpeech(request, nid=0):
         # 准确性模拟测试
         if isinstance(res, str) and chinesecharacter.JudgeCharacter(res[0]):
             tar = receive["target"]
+            wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+            wav_result.save()
             msg = chinesecharacter.GetErrorMessage(tar, res)
             return JsonResponse({"target": tar,"result": res, "success":True, "msg": msg})
         else:
             return JsonResponse({"target": tar,"result": res, "success":False, "msg": "识别失败"})
+    elif nid == 7:
+        # 临时供五六年级测试
+        if isinstance(res, str):
+            tar = receive["character"]
+            wav_result.errmsg = chinesecharacter.GetErrorMessage(tar, res)
+            wav_result.save()
+            again = False
+            # 判断 目标汉字 和 候选集合的关系
+            flag = chinesecharacter.JudgeSingleCharacter(tar, rset)
+
+            # 所有年级统计结果
+            if models.Character.objects.filter(character=tar).exists():
+                row_object = models.Character.objects.get(character=tar)
+                row_object.total_time = row_object.total_time + 1
+                if flag:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+            else:
+                row_object = Character(character=tar, total_time=1, accurate_time=0)
+                if flag:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+
+            # 每个年级统计结果
+            if models.CharacterOfGrade.objects.filter(character=tar, grade=grade).exists():
+                row_object = models.CharacterOfGrade.objects.filter(character=tar, grade=grade).first()
+                row_object.total_time = row_object.total_time + 1
+                if flag:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+            else:
+                row_object = CharacterOfGrade(character=tar, grade=grade, total_time=1, accurate_time=0)
+                if flag:
+                    row_object.accurate_time = row_object.accurate_time + 1
+                row_object.accuracy = row_object.accurate_time / row_object.total_time
+                row_object.save()
+
+            return JsonResponse({"target": tar, "result": res, "right": flag})
+        else:
+            return JsonResponse({"target": tar, "result": "error", "right": False})
 
 def stu_showList(request, nid=1):
     dic = request.session.get('info')
@@ -602,6 +698,9 @@ def stu_showList(request, nid=1):
         queryset = models.ExerciseV2Result.objects.filter(stu_account=account).order_by("-exercise_time")
     elif nid == 3:
         queryset = models.ExerciseV3Result.objects.filter(stu_account=account).order_by("-exercise_time")
+    elif nid == 4:
+        # 临时测试统计结果
+        queryset = models.ExerciseV4Result.objects.filter(stu_account=account).order_by("-exercise_time")
     page_object = Pagination(request, queryset)
 
     page_queryset = page_object.query_set
@@ -616,5 +715,7 @@ def stu_showList(request, nid=1):
         return render(request, "stu_listTwo.html", context)
     elif nid == 3:
         return render(request, "stu_listThree.html", context)
+    elif nid == 4:
+        return render(request, "stu_listFour.html", context)
     else:
         return redirect("/stu/home/")

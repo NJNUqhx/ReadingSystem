@@ -270,6 +270,28 @@ def download_excel(request, nid=0):
             else:
                 ws.cell(row, 6).value = "识别句子"
             row += 1
+    elif nid == 10:
+        ws['A1'] = '年级'
+        ws['B1'] = '学生'
+        ws['C1'] = '账号'
+        ws['D1'] = '时间'
+        ws['E1'] = '识字总数'
+        ws['F1'] = '正确率'
+        ws['G1'] = '分数'
+        ws['H1'] = '错误个数'
+        ws['I1'] = '错误汉字'
+
+        exercise_list = models.ExerciseV4Result.objects.all()
+        for i in range(0, len(exercise_list)):
+            ws.cell(i + 2, 1).value = exercise_list[i].grade
+            ws.cell(i + 2, 2).value = exercise_list[i].name
+            ws.cell(i + 2, 3).value = exercise_list[i].stu_account
+            ws.cell(i + 2, 4).value = exercise_list[i].exercise_time.__str__()
+            ws.cell(i + 2, 5).value = exercise_list[i].total_num
+            ws.cell(i + 2, 6).value = exercise_list[i].accuracy_rate
+            ws.cell(i + 2, 7).value = exercise_list[i].right_num
+            ws.cell(i + 2, 8).value = exercise_list[i].wrong_num
+            ws.cell(i + 2, 9).value = exercise_list[i].wrong_characters
 
     # 准备写入到IO中
     output = BytesIO()

@@ -170,6 +170,18 @@ def exercise_testThreeList(request, nid=0):
     return render(request, "exercise_listThree.html", context)
 
 
+def exercise_testFourList(request):
+    queryset = models.ExerciseV4Result.objects.order_by("-exercise_time")
+    page_object = Pagination(request, queryset)
+    page_queryset = page_object.query_set
+    page_string = page_object.html()
+    context = {
+        "queryset": page_queryset,
+        "page_string": page_string,
+    }
+    return render(request, "exercise_listFour.html", context)
+
+
 def recognition_list(request):
     data_dict = {}
     search_data = request.GET.get('q', "")

@@ -542,7 +542,7 @@ def JudgeSingleCharacterIsTolerable(tar, rset):
     else:
         for elem in new_set:
             if JudgeBetweenCharacters(tar, elem):
-                print(tar,elem,"相似")
+                print(tar, elem, "相似")
                 return True
         return False
 
@@ -594,3 +594,23 @@ def GetErrorMessage(tar, res):
         else:
             msg = "朗读部分正确，正确部分：" + lcs_str
     return msg
+
+
+# 临时测试题库获取
+def GetExerciseBank(grade=5):
+    if grade == 5:
+        file_path = 'reading_system/static/character/grade5.txt'
+    elif grade == 6:
+        file_path = 'reading_system/static/character/grade6.txt'
+    else:
+        return None
+    import re
+    # 打开文本文件
+    with open(file_path, 'r', encoding='utf-8') as file:
+        # 读取文件内容
+        content = file.read()
+        # 使用正则表达式匹配所有汉字
+        chinese_characters = re.findall(r'[\u4e00-\u9fff]', content)
+        # 存储到数组中
+        chinese_array = list(chinese_characters)
+        return chinese_array

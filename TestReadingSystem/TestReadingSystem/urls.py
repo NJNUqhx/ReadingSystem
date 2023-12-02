@@ -93,6 +93,11 @@ urlpatterns = [
     path('search/', search.SearchHome),
     path('search/character/', search.SearchCharacter),
     path('search/component/', search.SearchCharacterByComponent),
-    path('search/pyin/', search.SearchCharacterByPyin)
+    path('search/pyin/', search.SearchCharacterByPyin),
+
+    # 临时供五六年级测试
+    path('stu/testFour/', stu.stu_testFour),
+    path('stu/testFourResult/', stu.stu_testFourResult),
+    path('tec/testlist/four/', exercise.exercise_testFourList),
 
 ]
