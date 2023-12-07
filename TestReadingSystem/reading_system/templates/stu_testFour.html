@@ -243,14 +243,13 @@
             // 点击下一题按钮
             recordBtn.onclick = () =>  {
                     // 不断检测是否达到指定跳转条件
-                    checkTime();
-
                     $("#next_exercise").text("朗读结束");
                     $('#tip').text("点击右下角'朗读结束'进入下一题");
 
                     // 第一次点击开始按钮后
                     if(begin === false){
                         begin = true;
+                        checkTime();
                     }
 
                     // 开始点击时自动录音
