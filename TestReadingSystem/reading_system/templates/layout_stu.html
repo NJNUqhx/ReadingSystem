@@ -14,8 +14,10 @@
             text-align: center;
         }
         body{
-            background-image: url({% static 'img/background.jpeg' %});
-            background-size: cover;
+            background-image: url({% static 'img/bg1.jpg' %});
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
         .jumbotron{
             background-image: url({% static 'img/background2.jpeg' %});
